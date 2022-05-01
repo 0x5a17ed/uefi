@@ -33,3 +33,11 @@ func main() {
 	}
 }
 ```
+
+
+## 💡 Features
+- Works on Linux and on Windows
+- Reading Boot options
+- Setting next Boot option
+- Extensible
+- Simple API
