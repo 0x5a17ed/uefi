@@ -4,6 +4,8 @@
 
 A UEFI library written in go to interact with efivars. Compatible with Windows and Linux.
 
+This library tries its best to follow the UEFI 2.9 specification outlined [here](https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf).
+
 
 ## 📦 Installation
 
