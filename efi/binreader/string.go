@@ -1,0 +1,66 @@
+// Copyright (c) 2022 Arthur Skowronek <0x5a17ed@tuta.io> and contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// <https://www.apache.org/licenses/LICENSE-2.0>
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package binreader
+
+import (
+	"bytes"
+	"encoding/binary"
+	"io"
+	"unicode/utf16"
+)
+
+func ReadASCIINullBytes(r io.Reader) (out []byte, err error) {
+	var block [1]byte
+	for {
+		if _, err = r.Read(block[:]); err != nil {
+			return
+		}
+
+		out = append(out, block[:]...)
+		if bytes.Equal(block[:], []byte{0x00}) {
+			return
+		}
+	}
+}
+
+func ReadUTF16NullBytes(r io.Reader) (out []byte, err error) {
+	var block [2]byte
+	for {
+		if _, err = r.Read(block[:]); err != nil {
+			return
+		}
+
+		out = append(out, block[:]...)
+		if bytes.Equal(block[:], []byte{0x00, 0x00}) {
+			return
+		}
+	}
+}
+
+func UTF16BytesToString(b []byte) string {
+	utf := make([]uint16, len(b)/2)
+	for i, j := 0, 0; i < len(b)-2; i, j = i+2, j+1 {
+		utf[j] = binary.LittleEndian.Uint16(b[i:])
+	}
+	return string(utf16.Decode(utf))
+}
+
+func UTF16NullBytesToString(b []byte) (s string) {
+	s = UTF16BytesToString(b)
+	if len(s) > 0 && s[len(s)-1] == 0 {
+		s = s[:len(s)-1]
+	}
+	return
+}
