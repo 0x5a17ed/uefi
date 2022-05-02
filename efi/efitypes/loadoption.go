@@ -96,6 +96,7 @@ func (lo *LoadOption) ReadFrom(r io.Reader) (n int64, err error) {
 
 	_, err = binreader.ReadFields(r, &lo.Attributes, &lo.FilePathListLength)
 	if err != nil {
+		err = fmt.Errorf("LoadOption: %w", err)
 		return
 	}
 
@@ -105,9 +106,11 @@ func (lo *LoadOption) ReadFrom(r io.Reader) (n int64, err error) {
 		return
 	}
 
-	if _, err = lo.FilePathList.ReadFrom(wrapped); err != nil {
-		err = fmt.Errorf("FilepathList: %w", err)
-		return
+	if lo.FilePathListLength > 0 {
+		if _, err = lo.FilePathList.ReadFrom(wrapped); err != nil {
+			err = fmt.Errorf("LoadOption/FilepathList: %w", err)
+			return
+		}
 	}
 
 	lo.OptionalData, err = io.ReadAll(wrapped)
