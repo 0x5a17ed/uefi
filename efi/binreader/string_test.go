@@ -66,12 +66,43 @@ func TestUTF16NullBytesToString(t *testing.T) {
 		inp  []byte
 		want string
 	}{
-		{"golden path", []byte{0x61, 0x00, 0x73, 0x00, 0x64, 0x00, 0x00, 0x00}, "asd"},
+		{
+			"golden path",
+			[]byte{0x61, 0x00, 0x73, 0x00, 0x64, 0x00, 0x00, 0x00},
+			"asd",
+		},
+		{
+			"extra data past string",
+			[]byte{0x61, 0x00, 0x73, 0x00, 0x64, 0x00, 0x00, 0x00, 0x61, 0x00, 0x73, 0x00},
+			"asd",
+		},
+		{
+			"data without end mark",
+			[]byte{0x61, 0x00, 0x73, 0x00, 0x64, 0x00},
+			"asd",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := UTF16NullBytesToString(tt.inp); got != tt.want {
 				t.Errorf("UTF16NullBytesToString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUTF16BytesToString(t *testing.T) {
+	tests := []struct {
+		name     string
+		provided []byte
+		expected string
+	}{
+		{"", []byte{0x74, 0x00, 0x65, 0x00, 0x73, 0x00, 0x74, 0x00}, "test"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := UTF16BytesToString(tt.provided); got != tt.expected {
+				t.Errorf("UTF16BytesToString() = %v, want %v", got, tt.expected)
 			}
 		})
 	}

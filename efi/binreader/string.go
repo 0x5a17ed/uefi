@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
+	"strings"
 	"unicode/utf16"
 )
 
@@ -50,17 +51,17 @@ func ReadUTF16NullBytes(r io.Reader) (out []byte, err error) {
 }
 
 func UTF16BytesToString(b []byte) string {
-	utf := make([]uint16, len(b)/2)
-	for i, j := 0, 0; i < len(b)-2; i, j = i+2, j+1 {
-		utf[j] = binary.LittleEndian.Uint16(b[i:])
+	out := make([]uint16, len(b)>>1)
+	for i, j := 0, 0; j < len(b); i, j = i+1, j+2 {
+		out[i] = binary.LittleEndian.Uint16(b[j:])
 	}
-	return string(utf16.Decode(utf))
+	return string(utf16.Decode(out))
 }
 
 func UTF16NullBytesToString(b []byte) (s string) {
 	s = UTF16BytesToString(b)
-	if len(s) > 0 && s[len(s)-1] == 0 {
-		s = s[:len(s)-1]
+	if i := strings.IndexByte(s, 0); i != -1 {
+		s = s[:i]
 	}
 	return
 }
