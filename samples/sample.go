@@ -12,7 +12,7 @@ import (
 	"github.com/0x5a17ed/uefi/efi/efivars"
 )
 
-func ReadBootEntries(c *efivaraccess.Context) error {
+func ReadBootEntries(c efivaraccess.Context) error {
 	for i := 0; i < 10; i++ {
 		fmt.Println(fmt.Sprintf("\nEntry Boot%04d: ", i))
 
