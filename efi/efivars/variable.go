@@ -93,7 +93,7 @@ var (
 
 func Boot(i int) Variable[efitypes.LoadOption] {
 	return Variable[efitypes.LoadOption]{
-		name: fmt.Sprintf("Boot%04d", i),
+		name: fmt.Sprintf("Boot%04X", i),
 		guid: efi.GlobalVariable,
 	}
 }
