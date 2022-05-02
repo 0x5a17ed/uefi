@@ -45,6 +45,12 @@ func TestReadUTF16NullString(t *testing.T) {
 			wantOut: []byte{0x61, 0x00, 0x73, 0x00, 0x64, 0x00},
 			wantErr: true,
 		},
+		{
+			name:    "short",
+			inp:     []byte{0x61, 0x00, 0x00},
+			wantOut: []byte{0x61, 0x00},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -25,7 +25,7 @@ import (
 func ReadASCIINullBytes(r io.Reader) (out []byte, err error) {
 	var block [1]byte
 	for {
-		if _, err = r.Read(block[:]); err != nil {
+		if _, err = io.ReadFull(r, block[:]); err != nil {
 			return
 		}
 
@@ -39,7 +39,7 @@ func ReadASCIINullBytes(r io.Reader) (out []byte, err error) {
 func ReadUTF16NullBytes(r io.Reader) (out []byte, err error) {
 	var block [2]byte
 	for {
-		if _, err = r.Read(block[:]); err != nil {
+		if _, err = io.ReadFull(r, block[:]); err != nil {
 			return
 		}
 
