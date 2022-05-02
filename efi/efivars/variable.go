@@ -40,7 +40,7 @@ type Variable[T any] struct {
 func (e Variable[T]) Get(c efivaraccess.Context) (attrs efi.Attributes, value T, err error) {
 	attrs, data, err := efivarioutil.ReadAllWitGuid(c, e.name, e.guid)
 	if err != nil {
-		err = fmt.Errorf("efivars: failed reading value: %w", err)
+		err = fmt.Errorf("efivars/get(%s): load: %w", e.name, err)
 		return
 	}
 
@@ -53,7 +53,7 @@ func (e Variable[T]) Get(c efivaraccess.Context) (attrs efi.Attributes, value T,
 		err = binary.Read(buf, binary.LittleEndian, &value)
 	}
 	if err != nil {
-		err = fmt.Errorf("efivars/get: failed decoding value: %w", err)
+		err = fmt.Errorf("efivars/get(%s): parse: %w", e.name, err)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (e Variable[T]) SetWithAttributes(c efivaraccess.Context, attrs efi.Attribu
 		err = binary.Write(&buf, binary.LittleEndian, value)
 	}
 	if err != nil {
-		return fmt.Errorf("efivars/set: failed encoding value: %w", err)
+		return fmt.Errorf("efivars/set(%s): %w", e.name, err)
 	}
 
 	return c.SetWithGUID(e.name, e.guid, attrs, buf.Bytes())
