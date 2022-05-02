@@ -28,7 +28,8 @@ import (
 )
 
 const (
-	BootNextName = "BootNext"
+	BootNextName    = "BootNext"
+	BootCurrentName = "BootCurrent"
 )
 
 type Variable[T any] struct {
@@ -86,6 +87,14 @@ var (
 	// <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G14.1012867>
 	BootNext = Variable[uint16]{
 		name:         BootNextName,
+		guid:         efi.GlobalVariable,
+		defaultAttrs: efi.NonVolatile | efi.BootServiceAccess | efi.RuntimeAccess,
+	}
+
+	// BootCurrent defines the Boot#### option that was selected
+	// on the current boot.
+	BootCurrent = Variable[uint16]{
+		name:         BootCurrentName,
 		guid:         efi.GlobalVariable,
 		defaultAttrs: efi.NonVolatile | efi.BootServiceAccess | efi.RuntimeAccess,
 	}
