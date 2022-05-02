@@ -22,7 +22,7 @@ import (
 	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
-func ReadAllWitGuid(c *efivaraccess.Context, name string, guid guid.GUID) (
+func ReadAllWitGuid(c efivaraccess.Context, name string, guid guid.GUID) (
 	attrs efi.Attributes,
 	out []byte,
 	err error,
@@ -44,6 +44,6 @@ func ReadAllWitGuid(c *efivaraccess.Context, name string, guid guid.GUID) (
 	return
 }
 
-func ReadAll(c *efivaraccess.Context, name string) (efi.Attributes, []byte, error) {
+func ReadAll(c efivaraccess.Context, name string) (efi.Attributes, []byte, error) {
 	return ReadAllWitGuid(c, name, efi.GlobalVariable)
 }

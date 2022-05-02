@@ -27,13 +27,16 @@ import (
 	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
-type Context struct{}
+type WindowsContext struct{}
 
-func (c *Context) Close() error {
+// Ensure the public facing API in Context is implemented by FsContext.
+var _ Context = &WindowsContext{}
+
+func (c WindowsContext) Close() error {
 	return nil
 }
 
-func (c *Context) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
+func (c WindowsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		err = fmt.Errorf("efivaraccess/utf16(name): %w", err)
@@ -61,11 +64,11 @@ func (c *Context) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.At
 	return a, int(length), err
 }
 
-func (c *Context) Get(name string, out []byte) (a efi.Attributes, n int, err error) {
+func (c WindowsContext) Get(name string, out []byte) (a efi.Attributes, n int, err error) {
 	return c.GetWithGUID(name, efi.GlobalVariable, out)
 }
 
-func (c *Context) SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error {
+func (c WindowsContext) SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		return fmt.Errorf("efivaraccess/utf16(name): %w", err)
@@ -83,14 +86,10 @@ func (c *Context) SetWithGUID(name string, guid guid.GUID, attributes efi.Attrib
 	return nil
 }
 
-func (c *Context) Set(name string, attributes efi.Attributes, value []byte) error {
+func (c WindowsContext) Set(name string, attributes efi.Attributes, value []byte) error {
 	return c.SetWithGUID(name, efi.GlobalVariable, attributes, value)
 }
 
-func NewContext(path string) *Context {
-	return nil
-}
-
-func NewDefaultContext() *Context {
-	return &Context{}
+func NewDefaultContext() Context {
+	return &WindowsContext{}
 }

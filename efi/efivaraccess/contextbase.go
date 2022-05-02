@@ -27,7 +27,7 @@ var (
 	ErrNotFound          = errors.New("variable not found")
 )
 
-type contextInterface interface {
+type Context interface {
 	io.Closer
 
 	// GetWithGUID reads a specific EFI variable and returns the content in slice indicated by out.
@@ -42,6 +42,3 @@ type contextInterface interface {
 	// Set writes a global EFI variable.
 	Set(name string, attributes efi.Attributes, value []byte) error
 }
-
-// Ensure the public facing API is implemented by Context.
-var _ contextInterface = &Context{}

@@ -12,17 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build linux
+
 package efivaraccess
 
 import (
-	"fmt"
-	"testing"
+	"github.com/spf13/afero"
 )
 
-func TestGet(t *testing.T) {
-	c := NewDefaultContext()
+const (
+	DefaultEfiPath = "/sys/firmware/efi/efivars"
+)
 
-	var buf [256]byte
-	gotA, gotN, err := c.Get("PlatformLang", buf[:])
-	fmt.Println(string(buf[:gotN-1]), gotA, gotN, err)
+func NewContext(path string) Context {
+	return NewFileSystemContext(afero.NewBasePathFs(afero.NewOsFs(), path))
+}
+
+func NewDefaultContext() Context {
+	return NewContext(DefaultEfiPath)
 }

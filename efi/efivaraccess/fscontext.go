@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux
-
 package efivaraccess
 
 import (
@@ -32,23 +30,22 @@ import (
 	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
-const (
-	DefaultEfiPath = "/sys/firmware/efi/efivars"
-)
-
 func getFileName(name string, guid guid.GUID) string {
 	return fmt.Sprintf("%s-%s", name, guid)
 }
 
-type Context struct {
+type FsContext struct {
 	fs afero.Fs
 }
 
-func (c *Context) Close() error {
+// Ensure the public facing API in Context is implemented by FsContext.
+var _ Context = &FsContext{}
+
+func (c FsContext) Close() error {
 	return nil
 }
 
-func (c *Context) readEfiVarFileName(name string, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) readEfiVarFileName(name string, out []byte) (a efi.Attributes, n int, err error) {
 	f, err := c.fs.Open(name)
 	if err != nil {
 		var pathErr *os.PathError
@@ -77,7 +74,7 @@ func (c *Context) readEfiVarFileName(name string, out []byte) (a efi.Attributes,
 	return
 }
 
-func (c *Context) writeEfiVarFileName(name string, value []byte, attrs efi.Attributes) error {
+func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs efi.Attributes) error {
 	var buf bytes.Buffer
 
 	if err := binary.Write(&buf, binary.LittleEndian, attrs); err != nil {
@@ -106,26 +103,22 @@ func (c *Context) writeEfiVarFileName(name string, value []byte, attrs efi.Attri
 	return f.Sync()
 }
 
-func (c *Context) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
 	return c.readEfiVarFileName(getFileName(name, guid), out)
 }
 
-func (c *Context) Get(name string, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) Get(name string, out []byte) (a efi.Attributes, n int, err error) {
 	return c.GetWithGUID(name, efi.GlobalVariable, out)
 }
 
-func (c *Context) SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error {
+func (c FsContext) SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error {
 	return c.writeEfiVarFileName(getFileName(name, guid), value, attributes)
 }
 
-func (c *Context) Set(name string, attributes efi.Attributes, value []byte) error {
+func (c FsContext) Set(name string, attributes efi.Attributes, value []byte) error {
 	return c.SetWithGUID(name, efi.GlobalVariable, attributes, value)
 }
 
-func NewContext(path string) *Context {
-	return &Context{fs: afero.NewBasePathFs(afero.NewOsFs(), path)}
-}
-
-func NewDefaultContext() *Context {
-	return NewContext(DefaultEfiPath)
+func NewFileSystemContext(fs afero.Fs) *FsContext {
+	return &FsContext{fs: fs}
 }
