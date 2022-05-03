@@ -16,9 +16,16 @@ package efihex
 
 const hexTable = "0123456789ABCDEF"
 
-func Encode(dst, src []byte) {
+func EncodeBigEndian(dst, src []byte) {
 	_ = dst[len(src)*2-1] // bounds check hint to compiler
 	for i, j := 0, 0; i < len(src); i, j = i+1, j+2 {
 		dst[j], dst[j+1] = hexTable[src[i]>>4], hexTable[src[i]&0x0f]
+	}
+}
+
+func EncodeLittleEndian(dst, src []byte) {
+	_ = dst[len(src)*2-1] // bounds check hint to compiler
+	for i, j := 0, 0; i < len(src); i, j = i+1, j+2 {
+		dst[j], dst[j+1] = hexTable[src[len(src)-i-1]>>4], hexTable[src[len(src)-i-1]&0x0f]
 	}
 }

@@ -19,5 +19,5 @@ import (
 )
 
 var (
-	GlobalVariable = guid.MustFromString("8be4df61-93ca-11d2-aa0d-00e098032b8c")
+	GlobalVariable = guid.New(0x8be4df61, 0x93ca, 0x11d2, [8]byte{0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c})
 )

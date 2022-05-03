@@ -17,6 +17,6 @@ package efihex
 // EncodeToString returns the hexadecimal encoding of src.
 func EncodeToString(src []byte) string {
 	dst := make([]byte, len(src)*2)
-	Encode(dst, src)
+	EncodeBigEndian(dst, src)
 	return string(dst)
 }
