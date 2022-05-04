@@ -18,3 +18,4 @@ package efiwindows
 
 //sys	GetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte, attrs *uint32) (n uint32, err error) = kernel32.GetFirmwareEnvironmentVariableExW
 //sys	SetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte, attrs uint32) (err error) = kernel32.SetFirmwareEnvironmentVariableExW
+//sys	NtEnumerateSystemEnvironmentValuesEx(InformationClass uint32, buf *byte, buflen *uint32) (ntstatus error) = ntdll.NtEnumerateSystemEnvironmentValuesEx

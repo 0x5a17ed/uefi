@@ -18,6 +18,8 @@ import (
 	"errors"
 	"io"
 
+	"github.com/0x5a17ed/iterkit"
+
 	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/guid"
 )
@@ -26,6 +28,17 @@ var (
 	ErrInsufficientSpace = errors.New("buffer too small")
 	ErrNotFound          = errors.New("variable not found")
 )
+
+type VariableNameItem struct {
+	Name string
+	GUID guid.GUID
+}
+
+type VariableNameIterator interface {
+	io.Closer
+	iterkit.Iterator[VariableNameItem]
+	Err() error
+}
 
 type Context interface {
 	io.Closer
@@ -41,4 +54,8 @@ type Context interface {
 
 	// Set writes a global EFI variable.
 	Set(name string, attributes efi.Attributes, value []byte) error
+
+	// VariableNames returns an Iterator which enumerates all
+	// EFI variables that are currently set on the current system.
+	VariableNames() (VariableNameIterator, error)
 }

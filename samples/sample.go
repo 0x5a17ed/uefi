@@ -12,6 +12,23 @@ import (
 	"github.com/0x5a17ed/uefi/efi/efivars"
 )
 
+func ListAllVariables(c efivaraccess.Context) error {
+	iter, err := c.VariableNames()
+	if err != nil {
+		return fmt.Errorf("getIter: %w", err)
+	}
+	defer iter.Close()
+
+	for iter.Next() {
+		pp.Println(iter.Value())
+	}
+
+	if err := iter.Err(); err != nil {
+		return fmt.Errorf("iter/Next: %w", err)
+	}
+	return nil
+}
+
 func ReadBootEntries(c efivaraccess.Context) error {
 	for i := 0; i < 10; i++ {
 		fmt.Println(fmt.Sprintf("\nEntry Boot%04d: ", i))
@@ -40,8 +57,11 @@ func ReadBootEntries(c efivaraccess.Context) error {
 func Run(args []string) error {
 	fset := flag.NewFlagSet(args[0], flag.ExitOnError)
 
-	var listEntries bool
-	fset.BoolVar(&listEntries, "list", false, "list entries")
+	var listAllVariables bool
+	fset.BoolVar(&listAllVariables, "list-all", false, "list all variables")
+
+	var listBootEntries bool
+	fset.BoolVar(&listBootEntries, "list-boot", false, "list boot entries")
 
 	var setNextBoot bool
 	fset.BoolVar(&setNextBoot, "set-next", false, "set next boot option")
@@ -55,17 +75,16 @@ func Run(args []string) error {
 
 	c := efivaraccess.NewDefaultContext()
 
-	if listEntries {
-		if err := ReadBootEntries(c); err != nil {
-			return err
-		}
+	var err error
+	switch {
+	case listBootEntries:
+		err = ReadBootEntries(c)
+	case listAllVariables:
+		err = ListAllVariables(c)
+	case setNextBoot:
+		err = efivars.BootNext.Set(c, (uint16)(nextEntry))
+	default:
+		err = errors.New("no action selected")
 	}
-
-	if setNextBoot {
-		if err := efivars.BootNext.Set(c, (uint16)(nextEntry)); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return err
 }

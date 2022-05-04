@@ -39,9 +39,11 @@ func errnoErr(e syscall.Errno) error {
 
 var (
 	modkernel32 = windows.NewLazySystemDLL("kernel32.dll")
+	modntdll    = windows.NewLazySystemDLL("ntdll.dll")
 
-	procGetFirmwareEnvironmentVariableExW = modkernel32.NewProc("GetFirmwareEnvironmentVariableExW")
-	procSetFirmwareEnvironmentVariableExW = modkernel32.NewProc("SetFirmwareEnvironmentVariableExW")
+	procGetFirmwareEnvironmentVariableExW    = modkernel32.NewProc("GetFirmwareEnvironmentVariableExW")
+	procSetFirmwareEnvironmentVariableExW    = modkernel32.NewProc("SetFirmwareEnvironmentVariableExW")
+	procNtEnumerateSystemEnvironmentValuesEx = modntdll.NewProc("NtEnumerateSystemEnvironmentValuesEx")
 )
 
 func GetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte, attrs *uint32) (n uint32, err error) {
@@ -65,6 +67,14 @@ func SetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte
 	r1, _, e1 := syscall.Syscall6(procSetFirmwareEnvironmentVariableExW.Addr(), 5, uintptr(unsafe.Pointer(lpName)), uintptr(unsafe.Pointer(lpGuid)), uintptr(unsafe.Pointer(_p0)), uintptr(len(buf)), uintptr(attrs), 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
+	}
+	return
+}
+
+func NtEnumerateSystemEnvironmentValuesEx(InformationClass uint32, buf *byte, buflen *uint32) (ntstatus error) {
+	r0, _, _ := syscall.Syscall(procNtEnumerateSystemEnvironmentValuesEx.Addr(), 3, uintptr(InformationClass), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(buflen)))
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
 	}
 	return
 }

@@ -17,15 +17,75 @@
 package efivaraccess
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"syscall"
 
 	"golang.org/x/sys/windows"
 
 	"github.com/0x5a17ed/uefi/efi"
+	"github.com/0x5a17ed/uefi/efi/binreader"
 	"github.com/0x5a17ed/uefi/efi/efivaraccess/efiwindows"
 	"github.com/0x5a17ed/uefi/efi/guid"
 )
+
+type bufferVarEntry struct {
+	Length uint32
+
+	Guid guid.GUID
+
+	Name []byte
+}
+
+func (e *bufferVarEntry) ReadFrom(r io.Reader) (n int64, err error) {
+	r = binreader.NewReadTracker(r, &n)
+
+	if _, err = binreader.ReadFields(r, &e.Length, &e.Guid); err != nil {
+		return
+	}
+
+	e.Name = make([]byte, e.Length-20)
+	if _, err = io.ReadFull(r, e.Name); err != nil {
+		return
+	}
+
+	return
+}
+
+type varNameIterator struct {
+	buf     *bytes.Buffer
+	current *VariableNameItem
+	err     error
+}
+
+func (it *varNameIterator) Close() error { return nil }
+
+func (it *varNameIterator) Next() bool {
+	var entry bufferVarEntry
+	if _, err := entry.ReadFrom(it.buf); err != nil {
+		if !errors.Is(err, io.EOF) && errors.Is(err, io.ErrUnexpectedEOF) {
+			it.err = err
+		}
+		it.current = nil
+		return false
+	}
+
+	it.current = &VariableNameItem{
+		Name: binreader.UTF16NullBytesToString(entry.Name),
+		GUID: entry.Guid,
+	}
+	return true
+}
+
+func (it *varNameIterator) Value() VariableNameItem {
+	return *it.current
+}
+
+func (it *varNameIterator) Err() error {
+	return it.err
+}
 
 type WindowsContext struct{}
 
@@ -34,6 +94,23 @@ var _ Context = &WindowsContext{}
 
 func (c WindowsContext) Close() error {
 	return nil
+}
+
+func (c WindowsContext) VariableNames() (VariableNameIterator, error) {
+	var bufLen uint32
+	if err := efiwindows.NtEnumerateSystemEnvironmentValuesEx(1, nil, &bufLen); err != nil {
+		var ntStatus windows.NTStatus
+		if errors.As(err, &ntStatus) && ntStatus != 0xC0000023 {
+			return nil, err
+		}
+	}
+
+	buf := make([]byte, bufLen)
+	if err := efiwindows.NtEnumerateSystemEnvironmentValuesEx(1, &buf[0], &bufLen); err != nil {
+		return nil, err
+	}
+
+	return &varNameIterator{buf: bytes.NewBuffer(buf)}, nil
 }
 
 func (c WindowsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {

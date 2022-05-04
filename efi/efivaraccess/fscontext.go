@@ -20,7 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"regexp"
 	"syscall"
 
 	"github.com/spf13/afero"
@@ -29,6 +31,55 @@ import (
 	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/guid"
 )
+
+var nameRegex = regexp.MustCompile(`^([^-]+)-([\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12})$`)
+
+// iterator is a variable name iterator for FsContext
+type iterator struct {
+	f       afero.File
+	err     error
+	current *VariableNameItem
+}
+
+func (it *iterator) Close() error {
+	return it.f.Close()
+}
+
+func (it *iterator) Next() bool {
+	for {
+		names, err := it.f.Readdirnames(1)
+		if err != nil || len(names) < 1 {
+			if !errors.Is(err, io.EOF) {
+				it.err = err
+			}
+			it.current = nil
+			return false
+		}
+
+		matches := nameRegex.FindStringSubmatch(names[0])
+		if matches == nil {
+			continue
+		}
+
+		g, err := guid.FromString(matches[2])
+		if err != nil {
+			it.err = err
+			it.current = nil
+			return false
+		}
+
+		it.current = &VariableNameItem{Name: matches[1], GUID: g}
+		return true
+	}
+}
+
+func (it *iterator) Value() VariableNameItem {
+	return *it.current
+}
+
+func (it *iterator) Err() error {
+	return it.err
+}
 
 func getFileName(name string, guid guid.GUID) string {
 	return fmt.Sprintf("%s-%s", name, guid)
@@ -43,6 +94,14 @@ var _ Context = &FsContext{}
 
 func (c FsContext) Close() error {
 	return nil
+}
+
+func (c FsContext) VariableNames() (VariableNameIterator, error) {
+	f, err := c.fs.Open("")
+	if err != nil {
+		return nil, err
+	}
+	return &iterator{f: f}, nil
 }
 
 func (c FsContext) readEfiVarFileName(name string, out []byte) (a efi.Attributes, n int, err error) {
