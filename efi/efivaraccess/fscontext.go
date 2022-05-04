@@ -100,7 +100,21 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs efi.Attr
 		return fmt.Errorf("efivaraccess/set: %w", err)
 	}
 
-	return f.Sync()
+	if err := f.Sync(); err != nil {
+		var errno syscall.Errno
+		switch {
+		case errors.Is(err, fs.ErrInvalid):
+			fallthrough
+		case errors.As(err, &errno) && errno == syscall.EINVAL:
+			// fsync is not implemented by efivarfs yet so
+			// calling it here might sound silly, which it
+			// actually is.  Lets just ignore it for now.
+			return nil
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 func (c FsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
