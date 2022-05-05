@@ -27,8 +27,13 @@ func ReadAllWitGuid(c efivaraccess.Context, name string, guid guid.GUID) (
 	out []byte,
 	err error,
 ) {
-	out = make([]byte, 4)
-	for i := 8; i <= 4096; i = i << 1 {
+	var hint int64
+	if hint, err = c.GetSizeHint(name, guid); err != nil {
+		hint = 8
+	}
+
+	out = make([]byte, hint)
+	for i := int(hint) << 1; i <= 4096; i = i << 1 {
 		var n int
 		attrs, n, err = c.GetWithGUID(name, guid, out)
 		if err != nil {
