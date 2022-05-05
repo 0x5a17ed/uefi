@@ -1,9 +1,11 @@
-package samples
+package main
 
 import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/k0kubun/pp/v3"
 
@@ -20,7 +22,11 @@ func ListAllVariables(c efivaraccess.Context) error {
 	defer iter.Close()
 
 	for iter.Next() {
-		pp.Println(iter.Value())
+		v := iter.Value()
+		pp.Println(map[string]any{
+			"Name": v.Name,
+			"GUID": v.GUID.Braced(),
+		})
 	}
 
 	if err := iter.Err(); err != nil {
@@ -55,7 +61,7 @@ func ReadBootEntries(c efivaraccess.Context) error {
 }
 
 func Run(args []string) error {
-	fset := flag.NewFlagSet(args[0], flag.ExitOnError)
+	fset := flag.NewFlagSet(path.Base(args[0]), flag.ExitOnError)
 
 	var listAllVariables bool
 	fset.BoolVar(&listAllVariables, "list-all", false, "list all variables")
@@ -87,4 +93,13 @@ func Run(args []string) error {
 		err = errors.New("no action selected")
 	}
 	return err
+}
+
+func main() {
+	err := RunWithPrivileges(func() error {
+		return Run(os.Args)
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
