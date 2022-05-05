@@ -113,6 +113,23 @@ func (c WindowsContext) VariableNames() (VariableNameIterator, error) {
 	return &varNameIterator{buf: bytes.NewBuffer(buf)}, nil
 }
 
+func (c WindowsContext) GetSizeHint(name string, guid guid.GUID) (int64, error) {
+	lpName, err := syscall.UTF16PtrFromString(name)
+	if err != nil {
+		return 0, fmt.Errorf("utf16(%q): %w", name, err)
+	}
+
+	var uName windows.NTUnicodeString
+	windows.RtlInitUnicodeString(&uName, lpName)
+
+	var bufLen uint32
+	err = efiwindows.NtQuerySystemEnvironmentValueEx(&uName, &guid, nil, &bufLen, nil)
+	if err != nil && !errors.Is(err, windows.STATUS_BUFFER_TOO_SMALL) {
+		return 0, fmt.Errorf("query(%q): %w", name, err)
+	}
+	return int64(bufLen), nil
+}
+
 func (c WindowsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {

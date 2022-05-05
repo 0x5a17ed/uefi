@@ -44,6 +44,7 @@ var (
 	procGetFirmwareEnvironmentVariableExW    = modkernel32.NewProc("GetFirmwareEnvironmentVariableExW")
 	procSetFirmwareEnvironmentVariableExW    = modkernel32.NewProc("SetFirmwareEnvironmentVariableExW")
 	procNtEnumerateSystemEnvironmentValuesEx = modntdll.NewProc("NtEnumerateSystemEnvironmentValuesEx")
+	procNtQuerySystemEnvironmentValueEx      = modntdll.NewProc("NtQuerySystemEnvironmentValueEx")
 )
 
 func GetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte, attrs *uint32) (n uint32, err error) {
@@ -73,6 +74,14 @@ func SetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte
 
 func NtEnumerateSystemEnvironmentValuesEx(InformationClass uint32, buf *byte, buflen *uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procNtEnumerateSystemEnvironmentValuesEx.Addr(), 3, uintptr(InformationClass), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(buflen)))
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtQuerySystemEnvironmentValueEx(name *windows.NTUnicodeString, guid *GUID, buf *byte, bufLen *uint32, attrs *uint32) (ntstatus error) {
+	r0, _, _ := syscall.Syscall6(procNtQuerySystemEnvironmentValueEx.Addr(), 5, uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(guid)), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(bufLen)), uintptr(unsafe.Pointer(attrs)), 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}

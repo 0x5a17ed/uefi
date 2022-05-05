@@ -43,6 +43,9 @@ type VariableNameIterator interface {
 type Context interface {
 	io.Closer
 
+	// GetSizeHint returns the value size of the variable.
+	GetSizeHint(name string, guid guid.GUID) (int64, error)
+
 	// GetWithGUID reads a specific EFI variable and returns the content in slice indicated by out.
 	GetWithGUID(name string, guid guid.GUID, out []byte) (efi.Attributes, int, error)
 

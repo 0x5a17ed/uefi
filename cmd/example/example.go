@@ -23,9 +23,18 @@ func ListAllVariables(c efivaraccess.Context) error {
 
 	for iter.Next() {
 		v := iter.Value()
+
+		size, err := c.GetSizeHint(v.Name, v.GUID)
+
+		var errString string
+		if err != nil {
+			errString = err.Error()
+		}
+
 		pp.Println(map[string]any{
 			"Name": v.Name,
 			"GUID": v.GUID.Braced(),
+			"Size": []any{size, errString},
 		})
 	}
 

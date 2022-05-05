@@ -176,6 +176,14 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs efi.Attr
 	return nil
 }
 
+func (c FsContext) GetSizeHint(name string, guid guid.GUID) (int64, error) {
+	fi, err := c.fs.Stat(getFileName(name, guid))
+	if err != nil {
+		return 0, err
+	}
+	return fi.Size() - 4, nil
+}
+
 func (c FsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
 	return c.readEfiVarFileName(getFileName(name, guid), out)
 }
