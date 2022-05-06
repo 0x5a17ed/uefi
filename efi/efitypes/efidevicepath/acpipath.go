@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 )
 
 const (
@@ -56,7 +56,7 @@ func (p *ACPIPath) Text() string {
 }
 
 func (p *ACPIPath) ReadFrom(r io.Reader) (n int64, err error) {
-	return binreader.ReadFields(r, &p.HID, &p.UID)
+	return efireader.ReadFields(r, &p.HID, &p.UID)
 }
 
 func ParseACPIDevicePath(f io.Reader, h Head) (p DevicePath, err error) {

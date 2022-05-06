@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package binreader
+package efireader
 
 import (
 	"encoding/binary"
@@ -20,13 +20,39 @@ import (
 	"io"
 )
 
-func ReadFields(r io.Reader, fields ...any) (n int64, err error) {
-	wrapped := NewReadTracker(r, &n)
+type FieldReader struct {
+	reader io.Reader
+	offset *int64
+}
+
+func (r *FieldReader) Read(p []byte) (n int, err error) {
+	n, err = r.reader.Read(p)
+	*r.offset += int64(n)
+	return
+}
+
+func (r *FieldReader) Offset() int64 {
+	return *r.offset
+}
+
+func (r *FieldReader) ReadFields(fields ...any) (err error) {
 	for i, d := range fields {
-		if err = binary.Read(wrapped, binary.LittleEndian, d); err != nil {
-			err = fmt.Errorf("field %d: %w", i, err)
+		if err = binary.Read(r, binary.LittleEndian, d); err != nil {
+			err = fmt.Errorf("field #%d: %w", i, err)
 			return
 		}
 	}
+	return
+}
+
+func NewFieldReader(reader io.Reader, offset *int64) *FieldReader {
+	if offset == nil {
+		offset = new(int64)
+	}
+	return &FieldReader{reader: reader, offset: offset}
+}
+
+func ReadFields(r io.Reader, fields ...any) (n int64, err error) {
+	err = NewFieldReader(r, &n).ReadFields(fields...)
 	return
 }

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 )
 
 const (
@@ -79,7 +79,7 @@ func (p *PCIDevicePath) Text() string {
 }
 
 func (p *PCIDevicePath) ReadFrom(r io.Reader) (n int64, err error) {
-	return binreader.ReadFields(r, &p.Function, &p.Device)
+	return efireader.ReadFields(r, &p.Function, &p.Device)
 }
 
 func ParseHardwareDevicePath(f io.Reader, h Head) (p DevicePath, err error) {

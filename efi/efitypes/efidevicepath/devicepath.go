@@ -22,7 +22,7 @@ import (
 
 	"github.com/0x5a17ed/iterkit"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 )
 
 // DevicePathType is used in Head to distinguish individual
@@ -150,16 +150,16 @@ func (p *DevicePaths) AllText() (out []string) {
 func (p *DevicePaths) ReadFrom(r io.Reader) (n int64, err error) {
 	var quit bool
 
-	wrapped := binreader.NewReadTracker(r, &n)
+	fr := efireader.NewFieldReader(r, &n)
 	for !quit {
 		var head Head
-		if _, err = binreader.ReadFields(wrapped, &head); err != nil {
-			return wrapped.Offset(), fmt.Errorf("head: %w", err)
+		if err = fr.ReadFields(&head); err != nil {
+			return fr.Offset(), fmt.Errorf("head: %w", err)
 		}
 
 		body := make([]byte, head.Length-4)
-		if _, err = io.ReadFull(wrapped, body); err != nil {
-			return wrapped.Offset(), fmt.Errorf("body: %w", err)
+		if _, err = io.ReadFull(fr, body); err != nil {
+			return fr.Offset(), fmt.Errorf("body: %w", err)
 		}
 
 		bodyReader := bytes.NewReader(body)

@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efihex"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 )
 
 //go:generate go run github.com/hexaflex/stringer -type=PartitionFormat,SignatureType -output mediapath_string.go
@@ -120,7 +120,7 @@ func (p *HardDriveMediaDevicePath) Text() string {
 }
 
 func (p *HardDriveMediaDevicePath) ReadFrom(r io.Reader) (n int64, err error) {
-	return binreader.ReadFields(
+	return efireader.ReadFields(
 		r,
 		&p.PartitionNumber,
 		&p.PartitionStartLBA,
@@ -152,7 +152,7 @@ type CDROMDevicePath struct {
 }
 
 func (p *CDROMDevicePath) ReadFrom(r io.Reader) (n int64, err error) {
-	return binreader.ReadFields(r, &p.BootEntry, &p.PartitionStartRBA, &p.PartitionSize)
+	return efireader.ReadFields(r, &p.BootEntry, &p.PartitionStartRBA, &p.PartitionSize)
 }
 
 func (p *CDROMDevicePath) GetHead() *Head {
@@ -186,13 +186,13 @@ func (p *VendorMediaDevicePath) GetHead() *Head {
 }
 
 func (p *VendorMediaDevicePath) ReadFrom(r io.Reader) (n int64, err error) {
-	r = binreader.NewReadTracker(r, &n)
+	fr := efireader.NewFieldReader(r, &n)
 
-	if _, err = binreader.ReadFields(r, &p.VendorGUID); err != nil {
+	if err = fr.ReadFields(&p.VendorGUID); err != nil {
 		return
 	}
 
-	p.VendorDefinedData, err = io.ReadAll(r)
+	p.VendorDefinedData, err = io.ReadAll(fr)
 	return
 }
 
@@ -204,7 +204,7 @@ type FilePathDevicePath struct {
 }
 
 func (f *FilePathDevicePath) Text() string {
-	return fmt.Sprintf("File(%s)", binreader.UTF16NullBytesToString(f.PathName))
+	return fmt.Sprintf("File(%s)", efireader.UTF16NullBytesToString(f.PathName))
 }
 
 func (p *FilePathDevicePath) GetHead() *Head {
@@ -212,8 +212,8 @@ func (p *FilePathDevicePath) GetHead() *Head {
 }
 
 func (p *FilePathDevicePath) ReadFrom(r io.Reader) (n int64, err error) {
-	wrapper := binreader.NewReadTracker(r, &n)
-	p.PathName, err = binreader.ReadUTF16NullBytes(wrapper)
+	wrapper := efireader.NewFieldReader(r, &n)
+	p.PathName, err = efireader.ReadUTF16NullBytes(wrapper)
 	return
 }
 

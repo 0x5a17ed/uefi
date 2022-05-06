@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 	"github.com/0x5a17ed/uefi/efi/efitypes/efidevicepath"
 )
 
@@ -92,28 +92,28 @@ type LoadOption struct {
 }
 
 func (lo *LoadOption) ReadFrom(r io.Reader) (n int64, err error) {
-	wrapped := binreader.NewReadTracker(r, &n)
+	fr := efireader.NewFieldReader(r, &n)
 
-	_, err = binreader.ReadFields(r, &lo.Attributes, &lo.FilePathListLength)
+	err = fr.ReadFields(&lo.Attributes, &lo.FilePathListLength)
 	if err != nil {
 		err = fmt.Errorf("LoadOption: %w", err)
 		return
 	}
 
-	lo.Description, err = binreader.ReadUTF16NullBytes(wrapped)
+	lo.Description, err = efireader.ReadUTF16NullBytes(fr)
 	if err != nil {
 		err = fmt.Errorf("LoadOption/Description: %w", err)
 		return
 	}
 
 	if lo.FilePathListLength > 0 {
-		if _, err = lo.FilePathList.ReadFrom(wrapped); err != nil {
+		if _, err = lo.FilePathList.ReadFrom(fr); err != nil {
 			err = fmt.Errorf("LoadOption/FilepathList: %w", err)
 			return
 		}
 	}
 
-	lo.OptionalData, err = io.ReadAll(wrapped)
+	lo.OptionalData, err = io.ReadAll(fr)
 
 	return
 }

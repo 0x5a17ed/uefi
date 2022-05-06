@@ -9,7 +9,7 @@ import (
 
 	"github.com/k0kubun/pp/v3"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 	"github.com/0x5a17ed/uefi/efi/efivario"
 	"github.com/0x5a17ed/uefi/efi/efivars"
 )
@@ -59,7 +59,7 @@ func ReadBootEntries(c efivario.Context) error {
 
 		pp.Println(map[string]any{
 			"Attributes":   attrs.String(),
-			"Description":  binreader.UTF16NullBytesToString(lo.Description),
+			"Description":  efireader.UTF16NullBytesToString(lo.Description),
 			"OptionalData": string(lo.OptionalData),
 			"Path":         lo.FilePathList.AllText(),
 			"LoadOption":   lo,

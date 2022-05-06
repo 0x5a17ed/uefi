@@ -25,8 +25,8 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/0x5a17ed/uefi/efi/binreader"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
+	"github.com/0x5a17ed/uefi/efi/efireader"
 	"github.com/0x5a17ed/uefi/efi/efivario/efiwindows"
 )
 
@@ -39,14 +39,14 @@ type bufferVarEntry struct {
 }
 
 func (e *bufferVarEntry) ReadFrom(r io.Reader) (n int64, err error) {
-	r = binreader.NewReadTracker(r, &n)
+	fr := efireader.NewFieldReader(r, &n)
 
-	if _, err = binreader.ReadFields(r, &e.Length, &e.Guid); err != nil {
+	if err = fr.ReadFields(&e.Length, &e.Guid); err != nil {
 		return
 	}
 
 	e.Name = make([]byte, e.Length-20)
-	if _, err = io.ReadFull(r, e.Name); err != nil {
+	if _, err = io.ReadFull(fr, e.Name); err != nil {
 		return
 	}
 
@@ -72,7 +72,7 @@ func (it *varNameIterator) Next() bool {
 	}
 
 	it.current = &VariableNameItem{
-		Name: binreader.UTF16NullBytesToString(entry.Name),
+		Name: efireader.UTF16NullBytesToString(entry.Name),
 		GUID: entry.Guid,
 	}
 	return true
