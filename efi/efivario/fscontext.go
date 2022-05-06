@@ -28,7 +28,6 @@ import (
 	"github.com/spf13/afero"
 	"go.uber.org/multierr"
 
-	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 )
 
@@ -184,20 +183,12 @@ func (c FsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
 	return fi.Size() - 4, nil
 }
 
-func (c FsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
+func (c FsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
 	return c.readEfiVarFileName(getFileName(name, guid), out)
 }
 
-func (c FsContext) Get(name string, out []byte) (a Attributes, n int, err error) {
-	return c.GetWithGUID(name, efi.GlobalVariable, out)
-}
-
-func (c FsContext) SetWithGUID(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
+func (c FsContext) Set(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	return c.writeEfiVarFileName(getFileName(name, guid), value, attributes)
-}
-
-func (c FsContext) Set(name string, attributes Attributes, value []byte) error {
-	return c.SetWithGUID(name, efi.GlobalVariable, attributes, value)
 }
 
 func NewFileSystemContext(fs afero.Fs) *FsContext {

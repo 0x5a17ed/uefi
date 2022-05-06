@@ -25,7 +25,6 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/binreader"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efivario/efiwindows"
@@ -130,7 +129,7 @@ func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, erro
 	return int64(bufLen), nil
 }
 
-func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
+func (c WindowsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		err = fmt.Errorf("efivario/utf16(name): %w", err)
@@ -158,11 +157,7 @@ func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) 
 	return a, int(length), err
 }
 
-func (c WindowsContext) Get(name string, out []byte) (a Attributes, n int, err error) {
-	return c.GetWithGUID(name, efi.GlobalVariable, out)
-}
-
-func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
+func (c WindowsContext) Set(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		return fmt.Errorf("efivario/utf16(name): %w", err)
@@ -178,10 +173,6 @@ func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes A
 		return fmt.Errorf("efivario/set: %w", err)
 	}
 	return nil
-}
-
-func (c WindowsContext) Set(name string, attributes Attributes, value []byte) error {
-	return c.SetWithGUID(name, efi.GlobalVariable, attributes, value)
 }
 
 func NewDefaultContext() Context {

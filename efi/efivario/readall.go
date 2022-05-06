@@ -31,11 +31,10 @@ package efivario
 import (
 	"errors"
 
-	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 )
 
-func ReadAllWitGuid(c Context, name string, guid efiguid.GUID) (
+func ReadAll(c Context, name string, guid efiguid.GUID) (
 	attrs Attributes,
 	out []byte,
 	err error,
@@ -48,7 +47,7 @@ func ReadAllWitGuid(c Context, name string, guid efiguid.GUID) (
 	out = make([]byte, hint)
 	for i := int(hint) << 1; i <= 4096; i = i << 1 {
 		var n int
-		attrs, n, err = c.GetWithGUID(name, guid, out)
+		attrs, n, err = c.Get(name, guid, out)
 		if err != nil {
 			if errors.Is(err, ErrInsufficientSpace) {
 				out = append(make([]byte, i-len(out)), out...)
@@ -60,8 +59,4 @@ func ReadAllWitGuid(c Context, name string, guid efiguid.GUID) (
 		return
 	}
 	return
-}
-
-func ReadAll(c Context, name string) (Attributes, []byte, error) {
-	return ReadAllWitGuid(c, name, efi.GlobalVariable)
 }

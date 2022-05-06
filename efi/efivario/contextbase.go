@@ -42,20 +42,15 @@ type VariableNameIterator interface {
 type Context interface {
 	io.Closer
 
-	// GetSizeHint returns the value size of the variable.
+	// GetSizeHint hints the value size of the variable.
 	GetSizeHint(name string, guid efiguid.GUID) (int64, error)
 
-	// GetWithGUID reads a specific EFI variable and returns the content in slice indicated by out.
-	GetWithGUID(name string, guid efiguid.GUID, out []byte) (Attributes, int, error)
+	// Get reads a specific EFI variable and returns the content
+	// in the slice passed through out.
+	Get(name string, guid efiguid.GUID, out []byte) (Attributes, int, error)
 
-	// Get reads a global EFI variable and returns the content in slice indicated by out.
-	Get(name string, out []byte) (Attributes, int, error)
-
-	// SetWithGUID writes a specific EFI variable.
-	SetWithGUID(name string, guid efiguid.GUID, attributes Attributes, value []byte) error
-
-	// Set writes a global EFI variable.
-	Set(name string, attributes Attributes, value []byte) error
+	// Set writes a specific EFI variable.
+	Set(name string, guid efiguid.GUID, attrs Attributes, value []byte) error
 
 	// VariableNames returns an Iterator which enumerates all
 	// EFI variables that are currently set on the current system.

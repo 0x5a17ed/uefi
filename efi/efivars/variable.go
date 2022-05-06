@@ -38,7 +38,7 @@ type Variable[T any] struct {
 }
 
 func (e Variable[T]) Get(c efivario.Context) (attrs efivario.Attributes, value T, err error) {
-	attrs, data, err := efivario.ReadAllWitGuid(c, e.name, e.guid)
+	attrs, data, err := efivario.ReadAll(c, e.name, e.guid)
 	if err != nil {
 		err = fmt.Errorf("efivars/get(%s): load: %w", e.name, err)
 		return
@@ -73,7 +73,7 @@ func (e Variable[T]) SetWithAttributes(c efivario.Context, attrs efivario.Attrib
 		return fmt.Errorf("efivars/set(%s): %w", e.name, err)
 	}
 
-	return c.SetWithGUID(e.name, e.guid, attrs, buf.Bytes())
+	return c.Set(e.name, e.guid, attrs, buf.Bytes())
 }
 
 func (e Variable[T]) Set(c efivario.Context, value T) error {
