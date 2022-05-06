@@ -18,11 +18,11 @@ import (
 	"errors"
 
 	"github.com/0x5a17ed/uefi/efi"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efivaraccess"
-	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
-func ReadAllWitGuid(c efivaraccess.Context, name string, guid guid.GUID) (
+func ReadAllWitGuid(c efivaraccess.Context, name string, guid efiguid.GUID) (
 	attrs efi.Attributes,
 	out []byte,
 	err error,

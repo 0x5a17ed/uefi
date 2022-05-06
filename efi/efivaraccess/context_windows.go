@@ -27,14 +27,14 @@ import (
 
 	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efivaraccess/efiwindows"
-	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
 type bufferVarEntry struct {
 	Length uint32
 
-	Guid guid.GUID
+	Guid efiguid.GUID
 
 	Name []byte
 }
@@ -113,7 +113,7 @@ func (c WindowsContext) VariableNames() (VariableNameIterator, error) {
 	return &varNameIterator{buf: bytes.NewBuffer(buf)}, nil
 }
 
-func (c WindowsContext) GetSizeHint(name string, guid guid.GUID) (int64, error) {
+func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		return 0, fmt.Errorf("utf16(%q): %w", name, err)
@@ -130,7 +130,7 @@ func (c WindowsContext) GetSizeHint(name string, guid guid.GUID) (int64, error) 
 	return int64(bufLen), nil
 }
 
-func (c WindowsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
+func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a efi.Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		err = fmt.Errorf("efivaraccess/utf16(name): %w", err)
@@ -162,7 +162,7 @@ func (c WindowsContext) Get(name string, out []byte) (a efi.Attributes, n int, e
 	return c.GetWithGUID(name, efi.GlobalVariable, out)
 }
 
-func (c WindowsContext) SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error {
+func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes efi.Attributes, value []byte) error {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		return fmt.Errorf("efivaraccess/utf16(name): %w", err)

@@ -17,13 +17,13 @@
 package efiwindows
 
 import (
-	"github.com/0x5a17ed/uefi/efi/guid"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 )
 
 //sys	GetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte, attrs *uint32) (n uint32, err error) = kernel32.GetFirmwareEnvironmentVariableExW
 //sys	SetFirmwareEnvironmentVariableEx(lpName *uint16, lpGuid *uint16, buf []byte, attrs uint32) (err error) = kernel32.SetFirmwareEnvironmentVariableExW
 //sys	NtEnumerateSystemEnvironmentValuesEx(InformationClass uint32, buf *byte, buflen *uint32) (ntstatus error) = ntdll.NtEnumerateSystemEnvironmentValuesEx
 
-type GUID = guid.GUID
+type GUID = efiguid.GUID
 
 //sys	NtQuerySystemEnvironmentValueEx(name *windows.NTUnicodeString, guid *GUID, buf *byte, bufLen *uint32, attrs *uint32) (ntstatus error) = ntdll.NtQuerySystemEnvironmentValueEx

@@ -29,7 +29,7 @@ import (
 	"go.uber.org/multierr"
 
 	"github.com/0x5a17ed/uefi/efi"
-	"github.com/0x5a17ed/uefi/efi/guid"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 )
 
 var nameRegex = regexp.MustCompile(`^([^-]+)-([\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12})$`)
@@ -61,7 +61,7 @@ func (it *iterator) Next() bool {
 			continue
 		}
 
-		g, err := guid.FromString(matches[2])
+		g, err := efiguid.FromString(matches[2])
 		if err != nil {
 			it.err = err
 			it.current = nil
@@ -81,7 +81,7 @@ func (it *iterator) Err() error {
 	return it.err
 }
 
-func getFileName(name string, guid guid.GUID) string {
+func getFileName(name string, guid efiguid.GUID) string {
 	return fmt.Sprintf("%s-%s", name, guid)
 }
 
@@ -176,7 +176,7 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs efi.Attr
 	return nil
 }
 
-func (c FsContext) GetSizeHint(name string, guid guid.GUID) (int64, error) {
+func (c FsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
 	fi, err := c.fs.Stat(getFileName(name, guid))
 	if err != nil {
 		return 0, err
@@ -184,7 +184,7 @@ func (c FsContext) GetSizeHint(name string, guid guid.GUID) (int64, error) {
 	return fi.Size() - 4, nil
 }
 
-func (c FsContext) GetWithGUID(name string, guid guid.GUID, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a efi.Attributes, n int, err error) {
 	return c.readEfiVarFileName(getFileName(name, guid), out)
 }
 
@@ -192,7 +192,7 @@ func (c FsContext) Get(name string, out []byte) (a efi.Attributes, n int, err er
 	return c.GetWithGUID(name, efi.GlobalVariable, out)
 }
 
-func (c FsContext) SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error {
+func (c FsContext) SetWithGUID(name string, guid efiguid.GUID, attributes efi.Attributes, value []byte) error {
 	return c.writeEfiVarFileName(getFileName(name, guid), value, attributes)
 }
 

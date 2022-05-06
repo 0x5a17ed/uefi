@@ -20,8 +20,8 @@ import (
 	"io"
 
 	"github.com/0x5a17ed/uefi/efi/binreader"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efihex"
-	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
 //go:generate go run github.com/hexaflex/stringer -type=PartitionFormat,SignatureType -output mediapath_string.go
@@ -109,7 +109,7 @@ func (p *HardDriveMediaDevicePath) Text() string {
 		sig = fmt.Sprintf("%#08x", binary.LittleEndian.Uint32(p.PartitionSignature[:]))
 	case GUIDPartitionFormat:
 		t = "GPT"
-		sig = (guid.GUID)(p.PartitionSignature).String()
+		sig = (efiguid.GUID)(p.PartitionSignature).String()
 	}
 
 	if p.PartitionNumber != 0 {
@@ -171,7 +171,7 @@ type VendorMediaDevicePath struct {
 
 	// VendorGUID is the Vendor-assigned GUID that defines the
 	// data that follows.
-	VendorGUID guid.GUID
+	VendorGUID efiguid.GUID
 
 	// VendorDefinedData is the Vendor-defined variable size data.
 	VendorDefinedData []byte

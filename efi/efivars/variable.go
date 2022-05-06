@@ -21,10 +21,10 @@ import (
 	"io"
 
 	"github.com/0x5a17ed/uefi/efi"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efitypes"
 	"github.com/0x5a17ed/uefi/efi/efivaraccess"
 	"github.com/0x5a17ed/uefi/efi/efivarioutil"
-	"github.com/0x5a17ed/uefi/efi/guid"
 )
 
 const (
@@ -34,7 +34,7 @@ const (
 
 type Variable[T any] struct {
 	name         string
-	guid         guid.GUID
+	guid         efiguid.GUID
 	defaultAttrs efi.Attributes
 }
 

@@ -21,7 +21,7 @@ import (
 	"github.com/0x5a17ed/iterkit"
 
 	"github.com/0x5a17ed/uefi/efi"
-	"github.com/0x5a17ed/uefi/efi/guid"
+	"github.com/0x5a17ed/uefi/efi/efiguid"
 )
 
 var (
@@ -31,7 +31,7 @@ var (
 
 type VariableNameItem struct {
 	Name string
-	GUID guid.GUID
+	GUID efiguid.GUID
 }
 
 type VariableNameIterator interface {
@@ -44,16 +44,16 @@ type Context interface {
 	io.Closer
 
 	// GetSizeHint returns the value size of the variable.
-	GetSizeHint(name string, guid guid.GUID) (int64, error)
+	GetSizeHint(name string, guid efiguid.GUID) (int64, error)
 
 	// GetWithGUID reads a specific EFI variable and returns the content in slice indicated by out.
-	GetWithGUID(name string, guid guid.GUID, out []byte) (efi.Attributes, int, error)
+	GetWithGUID(name string, guid efiguid.GUID, out []byte) (efi.Attributes, int, error)
 
 	// Get reads a global EFI variable and returns the content in slice indicated by out.
 	Get(name string, out []byte) (efi.Attributes, int, error)
 
 	// SetWithGUID writes a specific EFI variable.
-	SetWithGUID(name string, guid guid.GUID, attributes efi.Attributes, value []byte) error
+	SetWithGUID(name string, guid efiguid.GUID, attributes efi.Attributes, value []byte) error
 
 	// Set writes a global EFI variable.
 	Set(name string, attributes efi.Attributes, value []byte) error
