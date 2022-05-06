@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efitypes"
 	"github.com/0x5a17ed/uefi/efi/efivario"
@@ -86,7 +85,7 @@ var (
 	// <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G14.1012867>
 	BootNext = Variable[uint16]{
 		name:         BootNextName,
-		guid:         efi.GlobalVariable,
+		guid:         GlobalVariable,
 		defaultAttrs: efivario.NonVolatile | efivario.BootServiceAccess | efivario.RuntimeAccess,
 	}
 
@@ -94,7 +93,7 @@ var (
 	// on the current boot.
 	BootCurrent = Variable[uint16]{
 		name:         BootCurrentName,
-		guid:         efi.GlobalVariable,
+		guid:         GlobalVariable,
 		defaultAttrs: efivario.NonVolatile | efivario.BootServiceAccess | efivario.RuntimeAccess,
 	}
 )
@@ -106,6 +105,6 @@ var (
 func Boot(i int) Variable[efitypes.LoadOption] {
 	return Variable[efitypes.LoadOption]{
 		name: fmt.Sprintf("Boot%04X", i),
-		guid: efi.GlobalVariable,
+		guid: GlobalVariable,
 	}
 }

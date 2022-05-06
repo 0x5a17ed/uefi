@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package efi
+package efivars
 
 import (
 	"github.com/0x5a17ed/uefi/efi/efiguid"
