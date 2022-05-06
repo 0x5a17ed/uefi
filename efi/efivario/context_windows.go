@@ -114,7 +114,7 @@ func (c WindowsContext) VariableNames() (VariableNameIterator, error) {
 func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
-		return 0, fmt.Errorf("utf16(%q): %w", name, err)
+		return 0, fmt.Errorf("efivario/GetSizeHint: utf16(%q): %w", name, err)
 	}
 
 	var uName windows.NTUnicodeString
@@ -123,7 +123,7 @@ func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, erro
 	var bufLen uint32
 	err = efiwindows.NtQuerySystemEnvironmentValueEx(&uName, &guid, nil, &bufLen, nil)
 	if err != nil && !errors.Is(err, windows.STATUS_BUFFER_TOO_SMALL) {
-		return 0, fmt.Errorf("query(%q): %w", name, err)
+		return 0, fmt.Errorf("efivario/GetSizeHint: query(%q): %w", name, err)
 	}
 	return int64(bufLen), nil
 }
@@ -131,13 +131,13 @@ func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, erro
 func (c WindowsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
-		err = fmt.Errorf("efivario/utf16(name): %w", err)
+		err = fmt.Errorf("efivario/Get: utf16(name): %w", err)
 		return
 	}
 
 	lpGuid, err := syscall.UTF16PtrFromString(guid.Braced())
 	if err != nil {
-		err = fmt.Errorf("efivario/utf16(guid): %w", err)
+		err = fmt.Errorf("efivario/Get: utf16(guid): %w", err)
 		return
 	}
 
@@ -149,7 +149,7 @@ func (c WindowsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attri
 		case windows.ERROR_ENVVAR_NOT_FOUND:
 			err = ErrNotFound
 		default:
-			err = fmt.Errorf("efivario/get: %w", err)
+			err = fmt.Errorf("efivario/Get: %w", err)
 		}
 		return
 	}
@@ -159,17 +159,17 @@ func (c WindowsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attri
 func (c WindowsContext) Set(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
-		return fmt.Errorf("efivario/utf16(name): %w", err)
+		return fmt.Errorf("efivario/Set: utf16(%q): %w", name, err)
 	}
 
 	lpGuid, err := syscall.UTF16PtrFromString(guid.Braced())
 	if err != nil {
-		return fmt.Errorf("efivario/utf16(guid): %w", err)
+		return fmt.Errorf("efivario/Set: utf16(%q): %w", guid, err)
 	}
 
 	err = efiwindows.SetFirmwareEnvironmentVariableEx(lpName, lpGuid, value, (uint32)(attributes))
 	if err != nil {
-		return fmt.Errorf("efivario/set: %w", err)
+		return fmt.Errorf("efivario/Set: %w", err)
 	}
 	return nil
 }
