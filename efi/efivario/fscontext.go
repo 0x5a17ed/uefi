@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package efivaraccess
+package efivario
 
 import (
 	"bytes"
@@ -111,14 +111,14 @@ func (c FsContext) readEfiVarFileName(name string, out []byte) (a Attributes, n 
 		if errors.As(err, &pathErr) && pathErr.Err == syscall.ENOENT {
 			err = ErrNotFound
 		} else {
-			err = fmt.Errorf("efivaraccess/get: %w", err)
+			err = fmt.Errorf("efivario/get: %w", err)
 		}
 		return
 	}
 	defer multierr.AppendInvoke(&err, multierr.Close(f))
 
 	if err = binary.Read(f, binary.LittleEndian, &a); err != nil {
-		err = fmt.Errorf("efivaraccess/get: %w", err)
+		err = fmt.Errorf("efivario/get: %w", err)
 		return
 	}
 
@@ -137,11 +137,11 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attribut
 	var buf bytes.Buffer
 
 	if err := binary.Write(&buf, binary.LittleEndian, attrs); err != nil {
-		return fmt.Errorf("efivaraccess/set: write attr: %w", err)
+		return fmt.Errorf("efivario/set: write attr: %w", err)
 	}
 
 	if _, err := buf.Write(value); err != nil {
-		return fmt.Errorf("efivaraccess/set: write value: %w", err)
+		return fmt.Errorf("efivario/set: write value: %w", err)
 	}
 
 	flags := os.O_WRONLY | os.O_CREATE
@@ -151,12 +151,12 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attribut
 
 	f, err := c.fs.OpenFile(name, flags, 0644)
 	if err != nil {
-		return fmt.Errorf("efivaraccess/set: %w", err)
+		return fmt.Errorf("efivario/set: %w", err)
 	}
 	defer multierr.AppendInvoke(&err, multierr.Close(f))
 
 	if _, err := buf.WriteTo(f); err != nil {
-		return fmt.Errorf("efivaraccess/set: %w", err)
+		return fmt.Errorf("efivario/set: %w", err)
 	}
 
 	if err := f.Sync(); err != nil {

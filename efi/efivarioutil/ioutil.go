@@ -19,11 +19,11 @@ import (
 
 	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
-	"github.com/0x5a17ed/uefi/efi/efivaraccess"
+	"github.com/0x5a17ed/uefi/efi/efivario"
 )
 
-func ReadAllWitGuid(c efivaraccess.Context, name string, guid efiguid.GUID) (
-	attrs efivaraccess.Attributes,
+func ReadAllWitGuid(c efivario.Context, name string, guid efiguid.GUID) (
+	attrs efivario.Attributes,
 	out []byte,
 	err error,
 ) {
@@ -37,7 +37,7 @@ func ReadAllWitGuid(c efivaraccess.Context, name string, guid efiguid.GUID) (
 		var n int
 		attrs, n, err = c.GetWithGUID(name, guid, out)
 		if err != nil {
-			if errors.Is(err, efivaraccess.ErrInsufficientSpace) {
+			if errors.Is(err, efivario.ErrInsufficientSpace) {
 				out = append(make([]byte, i-len(out)), out...)
 				continue
 			}
@@ -49,6 +49,6 @@ func ReadAllWitGuid(c efivaraccess.Context, name string, guid efiguid.GUID) (
 	return
 }
 
-func ReadAll(c efivaraccess.Context, name string) (efivaraccess.Attributes, []byte, error) {
+func ReadAll(c efivario.Context, name string) (efivario.Attributes, []byte, error) {
 	return ReadAllWitGuid(c, name, efi.GlobalVariable)
 }

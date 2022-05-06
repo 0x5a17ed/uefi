@@ -10,11 +10,11 @@ import (
 	"github.com/k0kubun/pp/v3"
 
 	"github.com/0x5a17ed/uefi/efi/binreader"
-	"github.com/0x5a17ed/uefi/efi/efivaraccess"
+	"github.com/0x5a17ed/uefi/efi/efivario"
 	"github.com/0x5a17ed/uefi/efi/efivars"
 )
 
-func ListAllVariables(c efivaraccess.Context) error {
+func ListAllVariables(c efivario.Context) error {
 	iter, err := c.VariableNames()
 	if err != nil {
 		return fmt.Errorf("getIter: %w", err)
@@ -44,13 +44,13 @@ func ListAllVariables(c efivaraccess.Context) error {
 	return nil
 }
 
-func ReadBootEntries(c efivaraccess.Context) error {
+func ReadBootEntries(c efivario.Context) error {
 	for i := 0; i < 10; i++ {
 		fmt.Println(fmt.Sprintf("\nEntry Boot%04d: ", i))
 
 		attrs, lo, err := efivars.Boot(i).Get(c)
 		if err != nil {
-			if errors.Is(err, efivaraccess.ErrNotFound) {
+			if errors.Is(err, efivario.ErrNotFound) {
 				fmt.Println("EOF")
 				return nil
 			}
@@ -88,7 +88,7 @@ func Run(args []string) error {
 		return err
 	}
 
-	c := efivaraccess.NewDefaultContext()
+	c := efivario.NewDefaultContext()
 
 	var err error
 	switch {

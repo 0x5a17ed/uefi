@@ -14,7 +14,7 @@
 
 //go:build windows
 
-package efivaraccess
+package efivario
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ import (
 	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/binreader"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
-	"github.com/0x5a17ed/uefi/efi/efivaraccess/efiwindows"
+	"github.com/0x5a17ed/uefi/efi/efivario/efiwindows"
 )
 
 type bufferVarEntry struct {
@@ -133,13 +133,13 @@ func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, erro
 func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
-		err = fmt.Errorf("efivaraccess/utf16(name): %w", err)
+		err = fmt.Errorf("efivario/utf16(name): %w", err)
 		return
 	}
 
 	lpGuid, err := syscall.UTF16PtrFromString(guid.Braced())
 	if err != nil {
-		err = fmt.Errorf("efivaraccess/utf16(guid): %w", err)
+		err = fmt.Errorf("efivario/utf16(guid): %w", err)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) 
 		case windows.ERROR_ENVVAR_NOT_FOUND:
 			err = ErrNotFound
 		default:
-			err = fmt.Errorf("efivaraccess/get: %w", err)
+			err = fmt.Errorf("efivario/get: %w", err)
 		}
 		return
 	}
@@ -165,17 +165,17 @@ func (c WindowsContext) Get(name string, out []byte) (a Attributes, n int, err e
 func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
-		return fmt.Errorf("efivaraccess/utf16(name): %w", err)
+		return fmt.Errorf("efivario/utf16(name): %w", err)
 	}
 
 	lpGuid, err := syscall.UTF16PtrFromString(guid.Braced())
 	if err != nil {
-		return fmt.Errorf("efivaraccess/utf16(guid): %w", err)
+		return fmt.Errorf("efivario/utf16(guid): %w", err)
 	}
 
 	err = efiwindows.SetFirmwareEnvironmentVariableEx(lpName, lpGuid, value, (uint32)(attributes))
 	if err != nil {
-		return fmt.Errorf("efivaraccess/set: %w", err)
+		return fmt.Errorf("efivario/set: %w", err)
 	}
 	return nil
 }

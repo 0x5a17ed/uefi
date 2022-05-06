@@ -14,7 +14,7 @@
 
 //go:build linux
 
-package efivaraccess
+package efivario
 
 import (
 	"github.com/spf13/afero"

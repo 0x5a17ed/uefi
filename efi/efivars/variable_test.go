@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/0x5a17ed/uefi/efi/efivaraccess"
+	"github.com/0x5a17ed/uefi/efi/efivario"
 )
 
 func TestBoot(t *testing.T) {
@@ -38,7 +38,7 @@ func TestBoot(t *testing.T) {
 	f.Write(decoded)
 	f.Close()
 
-	c := efivaraccess.NewFileSystemContext(fs)
+	c := efivario.NewFileSystemContext(fs)
 
 	_, _, err = Boot(15).Get(c)
 	assert.NoError(t, err)
