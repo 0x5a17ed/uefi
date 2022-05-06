@@ -35,10 +35,10 @@ const (
 type Variable[T any] struct {
 	name         string
 	guid         efiguid.GUID
-	defaultAttrs efi.Attributes
+	defaultAttrs efivaraccess.Attributes
 }
 
-func (e Variable[T]) Get(c efivaraccess.Context) (attrs efi.Attributes, value T, err error) {
+func (e Variable[T]) Get(c efivaraccess.Context) (attrs efivaraccess.Attributes, value T, err error) {
 	attrs, data, err := efivarioutil.ReadAllWitGuid(c, e.name, e.guid)
 	if err != nil {
 		err = fmt.Errorf("efivars/get(%s): load: %w", e.name, err)
@@ -61,7 +61,7 @@ func (e Variable[T]) Get(c efivaraccess.Context) (attrs efi.Attributes, value T,
 	return
 }
 
-func (e Variable[T]) SetWithAttributes(c efivaraccess.Context, attrs efi.Attributes, value T) (err error) {
+func (e Variable[T]) SetWithAttributes(c efivaraccess.Context, attrs efivaraccess.Attributes, value T) (err error) {
 	var buf bytes.Buffer
 
 	var valueInterface any = &value
@@ -88,7 +88,7 @@ var (
 	BootNext = Variable[uint16]{
 		name:         BootNextName,
 		guid:         efi.GlobalVariable,
-		defaultAttrs: efi.NonVolatile | efi.BootServiceAccess | efi.RuntimeAccess,
+		defaultAttrs: efivaraccess.NonVolatile | efivaraccess.BootServiceAccess | efivaraccess.RuntimeAccess,
 	}
 
 	// BootCurrent defines the Boot#### option that was selected
@@ -96,7 +96,7 @@ var (
 	BootCurrent = Variable[uint16]{
 		name:         BootCurrentName,
 		guid:         efi.GlobalVariable,
-		defaultAttrs: efi.NonVolatile | efi.BootServiceAccess | efi.RuntimeAccess,
+		defaultAttrs: efivaraccess.NonVolatile | efivaraccess.BootServiceAccess | efivaraccess.RuntimeAccess,
 	}
 )
 

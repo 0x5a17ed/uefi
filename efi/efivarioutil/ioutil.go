@@ -23,7 +23,7 @@ import (
 )
 
 func ReadAllWitGuid(c efivaraccess.Context, name string, guid efiguid.GUID) (
-	attrs efi.Attributes,
+	attrs efivaraccess.Attributes,
 	out []byte,
 	err error,
 ) {
@@ -49,6 +49,6 @@ func ReadAllWitGuid(c efivaraccess.Context, name string, guid efiguid.GUID) (
 	return
 }
 
-func ReadAll(c efivaraccess.Context, name string) (efi.Attributes, []byte, error) {
+func ReadAll(c efivaraccess.Context, name string) (efivaraccess.Attributes, []byte, error) {
 	return ReadAllWitGuid(c, name, efi.GlobalVariable)
 }

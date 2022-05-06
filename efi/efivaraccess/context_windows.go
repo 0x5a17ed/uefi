@@ -130,7 +130,7 @@ func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, erro
 	return int64(bufLen), nil
 }
 
-func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a efi.Attributes, n int, err error) {
+func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		err = fmt.Errorf("efivaraccess/utf16(name): %w", err)
@@ -158,11 +158,11 @@ func (c WindowsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) 
 	return a, int(length), err
 }
 
-func (c WindowsContext) Get(name string, out []byte) (a efi.Attributes, n int, err error) {
+func (c WindowsContext) Get(name string, out []byte) (a Attributes, n int, err error) {
 	return c.GetWithGUID(name, efi.GlobalVariable, out)
 }
 
-func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes efi.Attributes, value []byte) error {
+func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	lpName, err := syscall.UTF16PtrFromString(name)
 	if err != nil {
 		return fmt.Errorf("efivaraccess/utf16(name): %w", err)
@@ -180,7 +180,7 @@ func (c WindowsContext) SetWithGUID(name string, guid efiguid.GUID, attributes e
 	return nil
 }
 
-func (c WindowsContext) Set(name string, attributes efi.Attributes, value []byte) error {
+func (c WindowsContext) Set(name string, attributes Attributes, value []byte) error {
 	return c.SetWithGUID(name, efi.GlobalVariable, attributes, value)
 }
 

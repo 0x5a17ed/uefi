@@ -104,7 +104,7 @@ func (c FsContext) VariableNames() (VariableNameIterator, error) {
 	return &iterator{f: f}, nil
 }
 
-func (c FsContext) readEfiVarFileName(name string, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) readEfiVarFileName(name string, out []byte) (a Attributes, n int, err error) {
 	f, err := c.fs.Open(name)
 	if err != nil {
 		var pathErr *os.PathError
@@ -133,7 +133,7 @@ func (c FsContext) readEfiVarFileName(name string, out []byte) (a efi.Attributes
 	return
 }
 
-func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs efi.Attributes) error {
+func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attributes) error {
 	var buf bytes.Buffer
 
 	if err := binary.Write(&buf, binary.LittleEndian, attrs); err != nil {
@@ -145,7 +145,7 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs efi.Attr
 	}
 
 	flags := os.O_WRONLY | os.O_CREATE
-	if attrs&efi.AppendWrite != 0 {
+	if attrs&AppendWrite != 0 {
 		flags |= os.O_APPEND
 	}
 
@@ -184,19 +184,19 @@ func (c FsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
 	return fi.Size() - 4, nil
 }
 
-func (c FsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) GetWithGUID(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
 	return c.readEfiVarFileName(getFileName(name, guid), out)
 }
 
-func (c FsContext) Get(name string, out []byte) (a efi.Attributes, n int, err error) {
+func (c FsContext) Get(name string, out []byte) (a Attributes, n int, err error) {
 	return c.GetWithGUID(name, efi.GlobalVariable, out)
 }
 
-func (c FsContext) SetWithGUID(name string, guid efiguid.GUID, attributes efi.Attributes, value []byte) error {
+func (c FsContext) SetWithGUID(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	return c.writeEfiVarFileName(getFileName(name, guid), value, attributes)
 }
 
-func (c FsContext) Set(name string, attributes efi.Attributes, value []byte) error {
+func (c FsContext) Set(name string, attributes Attributes, value []byte) error {
 	return c.SetWithGUID(name, efi.GlobalVariable, attributes, value)
 }
 
