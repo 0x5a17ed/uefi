@@ -98,8 +98,7 @@ func (c WindowsContext) Close() error {
 func (c WindowsContext) VariableNames() (VariableNameIterator, error) {
 	var bufLen uint32
 	if err := efiwindows.NtEnumerateSystemEnvironmentValuesEx(1, nil, &bufLen); err != nil {
-		var ntStatus windows.NTStatus
-		if errors.As(err, &ntStatus) && ntStatus != 0xC0000023 {
+		if !errors.Is(err, windows.STATUS_BUFFER_TOO_SMALL) {
 			return nil, err
 		}
 	}
