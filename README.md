@@ -9,7 +9,7 @@ This library tries its best to follow the UEFI 2.9 specification outlined [here]
 
 ## 📦 Installation
 
-```shell
+```console
 $ go get -u github.com/0x5a17ed/uefi@latest
 ```
 
