@@ -21,13 +21,7 @@ import (
 	"io"
 
 	"github.com/0x5a17ed/uefi/efi/efiguid"
-	"github.com/0x5a17ed/uefi/efi/efitypes"
 	"github.com/0x5a17ed/uefi/efi/efivario"
-)
-
-const (
-	BootNextName    = "BootNext"
-	BootCurrentName = "BootCurrent"
 )
 
 type Variable[T any] struct {
@@ -77,34 +71,4 @@ func (e Variable[T]) SetWithAttributes(c efivario.Context, attrs efivario.Attrib
 
 func (e Variable[T]) Set(c efivario.Context, value T) error {
 	return e.SetWithAttributes(c, e.defaultAttrs, value)
-}
-
-var (
-	// BootNext specifies the first boot option on the next boot.
-	//
-	// <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G14.1012867>
-	BootNext = Variable[uint16]{
-		name:         BootNextName,
-		guid:         GlobalVariable,
-		defaultAttrs: efivario.NonVolatile | efivario.BootServiceAccess | efivario.RuntimeAccess,
-	}
-
-	// BootCurrent defines the Boot#### option that was selected
-	// on the current boot.
-	BootCurrent = Variable[uint16]{
-		name:         BootCurrentName,
-		guid:         GlobalVariable,
-		defaultAttrs: efivario.NonVolatile | efivario.BootServiceAccess | efivario.RuntimeAccess,
-	}
-)
-
-// Boot returns an EFI Variable pointing to the boot LoadOption
-// for the given index.
-//
-// <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G7.1346720>
-func Boot(i int) Variable[efitypes.LoadOption] {
-	return Variable[efitypes.LoadOption]{
-		name: fmt.Sprintf("Boot%04X", i),
-		guid: GlobalVariable,
-	}
 }
