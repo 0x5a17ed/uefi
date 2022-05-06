@@ -12,18 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package efivarioutil
+// Copyright (c) 2022 Arthur Skowronek <0x5a17ed@tuta.io> and contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// <https://www.apache.org/licenses/LICENSE-2.0>
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package efivario
 
 import (
 	"errors"
 
 	"github.com/0x5a17ed/uefi/efi"
 	"github.com/0x5a17ed/uefi/efi/efiguid"
-	"github.com/0x5a17ed/uefi/efi/efivario"
 )
 
-func ReadAllWitGuid(c efivario.Context, name string, guid efiguid.GUID) (
-	attrs efivario.Attributes,
+func ReadAllWitGuid(c Context, name string, guid efiguid.GUID) (
+	attrs Attributes,
 	out []byte,
 	err error,
 ) {
@@ -37,7 +50,7 @@ func ReadAllWitGuid(c efivario.Context, name string, guid efiguid.GUID) (
 		var n int
 		attrs, n, err = c.GetWithGUID(name, guid, out)
 		if err != nil {
-			if errors.Is(err, efivario.ErrInsufficientSpace) {
+			if errors.Is(err, ErrInsufficientSpace) {
 				out = append(make([]byte, i-len(out)), out...)
 				continue
 			}
@@ -49,6 +62,6 @@ func ReadAllWitGuid(c efivario.Context, name string, guid efiguid.GUID) (
 	return
 }
 
-func ReadAll(c efivario.Context, name string) (efivario.Attributes, []byte, error) {
+func ReadAll(c Context, name string) (Attributes, []byte, error) {
 	return ReadAllWitGuid(c, name, efi.GlobalVariable)
 }

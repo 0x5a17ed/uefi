@@ -24,7 +24,6 @@ import (
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 	"github.com/0x5a17ed/uefi/efi/efitypes"
 	"github.com/0x5a17ed/uefi/efi/efivario"
-	"github.com/0x5a17ed/uefi/efi/efivarioutil"
 )
 
 const (
@@ -39,7 +38,7 @@ type Variable[T any] struct {
 }
 
 func (e Variable[T]) Get(c efivario.Context) (attrs efivario.Attributes, value T, err error) {
-	attrs, data, err := efivarioutil.ReadAllWitGuid(c, e.name, e.guid)
+	attrs, data, err := efivario.ReadAllWitGuid(c, e.name, e.guid)
 	if err != nil {
 		err = fmt.Errorf("efivars/get(%s): load: %w", e.name, err)
 		return
