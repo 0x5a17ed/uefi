@@ -6,12 +6,18 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
+	"strconv"
 
 	"github.com/k0kubun/pp/v3"
 
 	"github.com/0x5a17ed/uefi/efi/efireader"
 	"github.com/0x5a17ed/uefi/efi/efivario"
 	"github.com/0x5a17ed/uefi/efi/efivars"
+)
+
+var (
+	bootRe = regexp.MustCompile(`^Boot([\da-fA-F]{4})$`)
 )
 
 func ListAllVariables(c efivario.Context) error {
@@ -45,15 +51,33 @@ func ListAllVariables(c efivario.Context) error {
 }
 
 func ReadBootEntries(c efivario.Context) error {
-	for i := 0; i < 10; i++ {
-		fmt.Println(fmt.Sprintf("\nEntry Boot%04d: ", i))
+	iter, err := c.VariableNames()
+	if err != nil {
+		return fmt.Errorf("getIter: %w", err)
+	}
+	defer iter.Close()
 
-		attrs, lo, err := efivars.Boot(i).Get(c)
+	for iter.Next() {
+		v := iter.Value()
+
+		if v.GUID != efivars.GlobalVariable {
+			continue
+		}
+
+		matches := bootRe.FindStringSubmatch(v.Name)
+		if matches == nil {
+			continue
+		}
+
+		value, err := strconv.ParseInt(matches[1], 16, 16)
 		if err != nil {
-			if errors.Is(err, efivario.ErrNotFound) {
-				fmt.Println("EOF")
-				return nil
-			}
+			continue
+		}
+
+		fmt.Printf("\nEntry Boot%04X(%[1]d):\n", value)
+
+		attrs, lo, err := efivars.Boot(int(value)).Get(c)
+		if err != nil {
 			return err
 		}
 
@@ -64,6 +88,9 @@ func ReadBootEntries(c efivario.Context) error {
 			"Path":         lo.FilePathList.AllText(),
 			"LoadOption":   lo,
 		})
+	}
+	if err := iter.Err(); err != nil {
+		return fmt.Errorf("iter/Next: %w", err)
 	}
 
 	return nil
