@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
@@ -56,6 +57,63 @@ func (s *FsContextTestSuite) SetupTest() {
 
 func (s *FsContextTestSuite) TearDownTest() {
 	require.NoError(s.T(), os.RemoveAll(s.tmpDir))
+}
+
+// TestGetNonExistent tests reading a non-existing variable.
+func (s *FsContextTestSuite) TestGetNonExistent() {
+	// given that ...
+	_, err := s.context.fs.Stat("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
+	require.ErrorIs(s.T(), err, afero.ErrFileNotFound)
+
+	buf := make([]byte, 4096)
+
+	// when ...
+	_, _, err = s.context.Get("TestVar", testGuid, buf)
+
+	// then ...
+	require.ErrorIs(s.T(), err, ErrNotFound)
+}
+
+// TestGet tests reading an existing variable.
+func (s *FsContextTestSuite) TestGet() {
+	// given that ...
+	f, err := s.context.fs.Create("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
+	require.NoError(s.T(), err)
+	defer func() { require.NoError(s.T(), f.Close()) }()
+
+	_, err = f.Write([]byte{0x07, 0x00, 0x00, 0x00, 0x65, 0x6e, 0x2d, 0x55, 0x53, 0x00})
+	require.NoError(s.T(), err)
+	require.NoError(s.T(), f.Sync())
+
+	buf := make([]byte, 6)
+
+	// when ...
+	attrs, length, err := s.context.Get("TestVar", testGuid, buf)
+
+	// then ...
+	require.NoError(s.T(), err)
+	assert.Equal(s.T(), RuntimeAccess|BootServiceAccess|NonVolatile, attrs)
+	assert.Equal(s.T(), 6, length)
+}
+
+// TestGetTooShort tests reading with a buffer too short.
+func (s *FsContextTestSuite) TestGetTooShort() {
+	// given that ...
+	f, err := s.context.fs.Create("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
+	require.NoError(s.T(), err)
+	defer func() { require.NoError(s.T(), f.Close()) }()
+
+	_, err = f.Write([]byte{0x07, 0x00, 0x00, 0x00, 0x65, 0x6e, 0x2d, 0x55, 0x53, 0x00})
+	require.NoError(s.T(), err)
+	require.NoError(s.T(), f.Sync())
+
+	buf := make([]byte, 5)
+
+	// when ...
+	_, _, err = s.context.Get("TestVar", testGuid, buf)
+
+	// then ...
+	require.ErrorIs(s.T(), err, ErrInsufficientSpace)
 }
 
 // TestSetNewVariable tests setting a new variable.
@@ -103,6 +161,19 @@ func (s *FsContextTestSuite) TestDelete() {
 	// then ...
 	_, err = s.context.fs.Stat("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
 	require.True(s.T(), errors.Is(err, afero.ErrFileNotFound))
+}
+
+// TestDeleteNonExistent tests deleting a non-existing variable.
+func (s *FsContextTestSuite) TestDeleteNonExistent() {
+	// given that ...
+	_, err := s.context.fs.Stat("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
+	require.True(s.T(), errors.Is(err, afero.ErrFileNotFound))
+
+	// when ...
+	err = s.context.Delete("TestVar", testGuid)
+
+	// then ...
+	require.True(s.T(), errors.Is(err, ErrNotFound))
 }
 
 // In order for 'go test' to run this suite, we need to create
