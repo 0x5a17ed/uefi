@@ -84,6 +84,9 @@ func getFileName(name string, guid efiguid.GUID) string {
 	return fmt.Sprintf("%s-%s", name, guid)
 }
 
+// FsContext provides an implementation of the Context API
+// for platforms using a directory/file-based representation of
+// the EFI variable service.
 type FsContext struct {
 	fs afero.Fs
 }
