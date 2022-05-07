@@ -86,6 +86,22 @@ func (it *varNameIterator) Err() error {
 	return it.err
 }
 
+func convertNameGuid(name string, guid efiguid.GUID) (lpName, lpGuid *uint16, err error) {
+	lpName, err = syscall.UTF16PtrFromString(name)
+	if err != nil {
+		err = fmt.Errorf("utf16(%q): %w", name, err)
+		return
+	}
+
+	lpGuid, err = syscall.UTF16PtrFromString(guid.Braced())
+	if err != nil {
+		err = fmt.Errorf("utf16(%q): %w", guid, err)
+		return
+	}
+
+	return
+}
+
 // WindowsContext provides an implementation of the Context API
 // for the windows platform.
 type WindowsContext struct{}
@@ -131,15 +147,9 @@ func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, erro
 }
 
 func (c WindowsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attributes, n int, err error) {
-	lpName, err := syscall.UTF16PtrFromString(name)
+	lpName, lpGuid, err := convertNameGuid(name, guid)
 	if err != nil {
-		err = fmt.Errorf("efivario/Get: utf16(name): %w", err)
-		return
-	}
-
-	lpGuid, err := syscall.UTF16PtrFromString(guid.Braced())
-	if err != nil {
-		err = fmt.Errorf("efivario/Get: utf16(guid): %w", err)
+		err = fmt.Errorf("efivario/Get: %w", err)
 		return
 	}
 
@@ -159,19 +169,27 @@ func (c WindowsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attri
 }
 
 func (c WindowsContext) Set(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
-	lpName, err := syscall.UTF16PtrFromString(name)
+	lpName, lpGuid, err := convertNameGuid(name, guid)
 	if err != nil {
-		return fmt.Errorf("efivario/Set: utf16(%q): %w", name, err)
-	}
-
-	lpGuid, err := syscall.UTF16PtrFromString(guid.Braced())
-	if err != nil {
-		return fmt.Errorf("efivario/Set: utf16(%q): %w", guid, err)
+		return fmt.Errorf("efivario/Set: %w", err)
 	}
 
 	err = efiwindows.SetFirmwareEnvironmentVariableEx(lpName, lpGuid, value, (uint32)(attributes))
 	if err != nil {
 		return fmt.Errorf("efivario/Set: %w", err)
+	}
+	return nil
+}
+
+func (c WindowsContext) Delete(name string, guid efiguid.GUID) error {
+	lpName, lpGuid, err := convertNameGuid(name, guid)
+	if err != nil {
+		return fmt.Errorf("efivario/Delete: %w", err)
+	}
+
+	err = efiwindows.SetFirmwareEnvironmentVariableEx(lpName, lpGuid, nil, 0)
+	if err != nil {
+		return fmt.Errorf("efivario/Delete: %w", err)
 	}
 	return nil
 }

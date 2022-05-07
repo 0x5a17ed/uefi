@@ -52,6 +52,10 @@ type Context interface {
 	// Set writes a specific EFI variable.
 	Set(name string, guid efiguid.GUID, attrs Attributes, value []byte) error
 
+	// Delete causes the entire variable to be removed from
+	// existence completely.
+	Delete(name string, guid efiguid.GUID) error
+
 	// VariableNames returns an Iterator which enumerates all
 	// EFI variables that are currently set on the current system.
 	VariableNames() (VariableNameIterator, error)

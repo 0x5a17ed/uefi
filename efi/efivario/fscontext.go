@@ -204,6 +204,30 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attribut
 	return nil
 }
 
+func (c FsContext) deleteEfiFile(name string) error {
+	guard, err := openSafeguard(c.fs, name)
+	if err != nil {
+		return fmt.Errorf("efivario/delete: guard open: %w", err)
+	}
+	if guard != nil {
+		defer multierr.AppendInvoke(&err, multierr.Invoke(func() error {
+			if err := guard.Close(); err != nil {
+				return fmt.Errorf("efivario/set: guard close: %w", err)
+			}
+			return nil
+		}))
+	}
+
+	if _, err := guard.disable(); err != nil {
+		return fmt.Errorf("efivario/delete: guard disable: %w", err)
+	}
+
+	if err := c.fs.Remove(name); err != nil {
+		return fmt.Errorf("efivario/delete: remove: %w", err)
+	}
+	return nil
+}
+
 func (c FsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
 	fi, err := c.fs.Stat(getFileName(name, guid))
 	if err != nil {
@@ -218,6 +242,10 @@ func (c FsContext) Get(name string, guid efiguid.GUID, out []byte) (a Attributes
 
 func (c FsContext) Set(name string, guid efiguid.GUID, attributes Attributes, value []byte) error {
 	return c.writeEfiVarFileName(getFileName(name, guid), value, attributes)
+}
+
+func (c FsContext) Delete(name string, guid efiguid.GUID) error {
+	return c.deleteEfiFile(getFileName(name, guid))
 }
 
 func NewFileSystemContext(fs afero.Fs) *FsContext {

@@ -89,6 +89,22 @@ func (s *FsContextTestSuite) TestSetExistingVariable() {
 	require.NoError(s.T(), err)
 }
 
+// TestDelete tests deleting an existing variable.
+func (s *FsContextTestSuite) TestDelete() {
+	// given that ...
+	f, err := s.context.fs.Create("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
+	require.NoError(s.T(), err)
+	defer func() { require.NoError(s.T(), f.Close()) }()
+
+	// when ...
+	err = s.context.Delete("TestVar", testGuid)
+	require.NoError(s.T(), err)
+
+	// then ...
+	_, err = s.context.fs.Stat("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
+	require.True(s.T(), errors.Is(err, afero.ErrFileNotFound))
+}
+
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestFsContextTestSuite(t *testing.T) {
