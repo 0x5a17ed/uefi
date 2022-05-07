@@ -17,6 +17,8 @@
 package efivario
 
 import (
+	"os"
+
 	"github.com/spf13/afero"
 )
 
@@ -29,5 +31,9 @@ func NewContext(path string) Context {
 }
 
 func NewDefaultContext() Context {
-	return NewContext(DefaultEfiPath)
+	dir := os.Getenv("EFIVARFS_PATH")
+	if dir == "" {
+		dir = DefaultEfiPath
+	}
+	return NewContext(dir)
 }
