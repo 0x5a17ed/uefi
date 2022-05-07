@@ -135,7 +135,7 @@ func (c FsContext) readEfiVarFileName(name string, out []byte) (a Attributes, n 
 	return
 }
 
-func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attributes) error {
+func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attributes) (err error) {
 	var buf bytes.Buffer
 
 	if err := binary.Write(&buf, binary.LittleEndian, attrs); err != nil {
@@ -144,6 +144,32 @@ func (c FsContext) writeEfiVarFileName(name string, value []byte, attrs Attribut
 
 	if _, err := buf.Write(value); err != nil {
 		return fmt.Errorf("efivario/set: write value: %w", err)
+	}
+
+	guard, err := openSafeguard(c.fs, name)
+	if err != nil {
+		return fmt.Errorf("efivario/set: guard open: %w", err)
+	}
+	if guard != nil {
+		defer multierr.AppendInvoke(&err, multierr.Invoke(func() error {
+			if err := guard.Close(); err != nil {
+				return fmt.Errorf("efivario/set: guard close: %w", err)
+			}
+			return nil
+		}))
+	}
+
+	wasProtected, err := guard.disable()
+	if err != nil {
+		return fmt.Errorf("efivario/set: disable protection: %w", err)
+	}
+	if wasProtected {
+		defer multierr.AppendInvoke(&err, multierr.Invoke(func() error {
+			if err := guard.enable(); err != nil {
+				return fmt.Errorf("efivario/set: enable protection: %w", err)
+			}
+			return nil
+		}))
 	}
 
 	flags := os.O_WRONLY | os.O_CREATE
