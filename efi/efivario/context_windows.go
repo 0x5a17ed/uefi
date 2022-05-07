@@ -86,9 +86,11 @@ func (it *varNameIterator) Err() error {
 	return it.err
 }
 
+// WindowsContext provides an implementation of the Context API
+// for the windows platform.
 type WindowsContext struct{}
 
-// Ensure the public facing API in Context is implemented by FsContext.
+// Ensure the public facing API in Context is implemented by WindowsContext.
 var _ Context = &WindowsContext{}
 
 func (c WindowsContext) Close() error {
