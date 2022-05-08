@@ -20,6 +20,29 @@ var (
 	bootRe = regexp.MustCompile(`^Boot([\da-fA-F]{4})$`)
 )
 
+func ListBootOrder(c efivario.Context) error {
+	_, value, err := efivars.BootOrder.Get(c)
+	if err != nil {
+		return err
+	}
+
+	for i, index := range value {
+		_, lo, err := efivars.Boot(index).Get(c)
+		if err != nil {
+			return fmt.Errorf("entry %d (%04[1]X): %w", index, err)
+		}
+
+		pp.Println(map[string]any{
+			"Order":       i,
+			"Index":       index,
+			"Description": efireader.UTF16NullBytesToString(lo.Description),
+			"Path":        lo.FilePathList.AllText(),
+		})
+	}
+
+	return nil
+}
+
 func ListAllVariables(c efivario.Context) error {
 	iter, err := c.VariableNames()
 	if err != nil {
@@ -76,7 +99,7 @@ func ReadBootEntries(c efivario.Context) error {
 
 		fmt.Printf("\nEntry Boot%04X(%[1]d):\n", value)
 
-		attrs, lo, err := efivars.Boot(int(value)).Get(c)
+		attrs, lo, err := efivars.Boot(uint16(int(value))).Get(c)
 		if err != nil {
 			return err
 		}
@@ -105,6 +128,9 @@ func Run(args []string) error {
 	var listBootEntries bool
 	fset.BoolVar(&listBootEntries, "list-boot", false, "list boot entries")
 
+	var listBootOrder bool
+	fset.BoolVar(&listBootOrder, "list-boot-order", false, "list boot order")
+
 	var setNextBoot bool
 	fset.BoolVar(&setNextBoot, "set-next", false, "set next boot option")
 
@@ -119,6 +145,8 @@ func Run(args []string) error {
 
 	var err error
 	switch {
+	case listBootOrder:
+		err = ListBootOrder(c)
 	case listBootEntries:
 		err = ReadBootEntries(c)
 	case listAllVariables:

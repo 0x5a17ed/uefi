@@ -16,7 +16,6 @@ package efivars
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"io"
 
@@ -24,48 +23,52 @@ import (
 	"github.com/0x5a17ed/uefi/efi/efivario"
 )
 
+const (
+	globalAccess = efivario.BootServiceAccess | efivario.RuntimeAccess
+
+	defaultAttrs = efivario.NonVolatile | globalAccess
+)
+
+type MarshalFn[T any] func(w io.Writer, inp T) error
+type UnmarshalFn[T any] func(r io.Reader) (T, error)
+
 type Variable[T any] struct {
 	name         string
 	guid         efiguid.GUID
 	defaultAttrs efivario.Attributes
+
+	marshal   MarshalFn[T]
+	unmarshal UnmarshalFn[T]
 }
 
 func (e Variable[T]) Get(c efivario.Context) (attrs efivario.Attributes, value T, err error) {
+	if e.unmarshal == nil {
+		err = fmt.Errorf("efivars/get(%s): unsupported", e.name)
+		return
+	}
+
 	attrs, data, err := efivario.ReadAll(c, e.name, e.guid)
 	if err != nil {
 		err = fmt.Errorf("efivars/get(%s): load: %w", e.name, err)
 		return
 	}
 
-	buf := bytes.NewReader(data)
-
-	var valueInterface any = &value
-	if reader, ok := (valueInterface).(io.ReaderFrom); ok {
-		_, err = reader.ReadFrom(buf)
-	} else {
-		err = binary.Read(buf, binary.LittleEndian, &value)
-	}
+	value, err = e.unmarshal(bytes.NewReader(data))
 	if err != nil {
 		err = fmt.Errorf("efivars/get(%s): parse: %w", e.name, err)
-		return
 	}
-
 	return
 }
 
-func (e Variable[T]) SetWithAttributes(c efivario.Context, attrs efivario.Attributes, value T) (err error) {
+func (e Variable[T]) SetWithAttributes(c efivario.Context, attrs efivario.Attributes, value T) error {
+	if e.marshal == nil {
+		return fmt.Errorf("efivars/set(%s): unsupported", e.name)
+	}
+
 	var buf bytes.Buffer
-
-	var valueInterface any = &value
-	if writer, ok := (valueInterface).(io.WriterTo); ok {
-		_, err = writer.WriteTo(&buf)
-	} else {
-		err = binary.Write(&buf, binary.LittleEndian, value)
+	if err := e.marshal(&buf, value); err != nil {
+		return fmt.Errorf("efivars/set(%s): write: %w", e.name, err)
 	}
-	if err != nil {
-		return fmt.Errorf("efivars/set(%s): %w", e.name, err)
-	}
-
 	return c.Set(e.name, e.guid, attrs, buf.Bytes())
 }
 

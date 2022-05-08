@@ -18,12 +18,12 @@ import (
 	"fmt"
 
 	"github.com/0x5a17ed/uefi/efi/efitypes"
-	"github.com/0x5a17ed/uefi/efi/efivario"
 )
 
 const (
 	BootNextName    = "BootNext"
 	BootCurrentName = "BootCurrent"
+	BootOrderName   = "BootOrder"
 )
 
 var (
@@ -33,7 +33,9 @@ var (
 	BootNext = Variable[uint16]{
 		name:         BootNextName,
 		guid:         GlobalVariable,
-		defaultAttrs: efivario.NonVolatile | efivario.BootServiceAccess | efivario.RuntimeAccess,
+		defaultAttrs: defaultAttrs,
+		marshal:      primitiveMarshaller[uint16],
+		unmarshal:    primitiveUnmarshaller[uint16],
 	}
 
 	// BootCurrent defines the Boot#### option that was selected
@@ -43,7 +45,25 @@ var (
 	BootCurrent = Variable[uint16]{
 		name:         BootCurrentName,
 		guid:         GlobalVariable,
-		defaultAttrs: efivario.NonVolatile | efivario.BootServiceAccess | efivario.RuntimeAccess,
+		defaultAttrs: defaultAttrs,
+		marshal:      primitiveMarshaller[uint16],
+		unmarshal:    primitiveUnmarshaller[uint16],
+	}
+
+	// BootOrder is an ordered list of the Boot#### options.
+	//
+	// The first element in the array is the value for the first
+	// logical boot option, the second element is the value for
+	// the second logical boot option, etc. The BootOrder order
+	// list is used by the firmware’s boot manager as the default
+	// boot order.
+	//
+	// <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G7.1346720>
+	BootOrder = Variable[[]uint16]{
+		name:         BootOrderName,
+		guid:         GlobalVariable,
+		defaultAttrs: defaultAttrs,
+		unmarshal:    sliceUnmarshaller[uint16],
 	}
 )
 
@@ -51,9 +71,10 @@ var (
 // for the given index.
 //
 // <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G7.1346720>
-func Boot(i int) Variable[efitypes.LoadOption] {
-	return Variable[efitypes.LoadOption]{
-		name: fmt.Sprintf("Boot%04X", i),
-		guid: GlobalVariable,
+func Boot(i uint16) Variable[*efitypes.LoadOption] {
+	return Variable[*efitypes.LoadOption]{
+		name:      fmt.Sprintf("Boot%04X", i),
+		guid:      GlobalVariable,
+		unmarshal: structUnmarshaller[efitypes.LoadOption],
 	}
 }

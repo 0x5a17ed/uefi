@@ -43,3 +43,4 @@ func main() {
 - Simple API
 - Reading individual Boot options
 - Setting next Boot option
+- Managing Boot order

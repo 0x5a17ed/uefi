@@ -25,8 +25,8 @@ func ReadAll(c Context, name string, guid efiguid.GUID) (
 	out []byte,
 	err error,
 ) {
-	var hint int64
-	if hint, err = c.GetSizeHint(name, guid); err != nil {
+	hint, err := c.GetSizeHint(name, guid)
+	if err != nil || hint < 0 {
 		hint = 8
 	}
 
