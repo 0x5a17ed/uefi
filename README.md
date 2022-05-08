@@ -38,8 +38,8 @@ func main() {
 
 
 ## 💡 Features
-- Works on Linux and on Windows
-- Reading Boot options
-- Setting next Boot option
+- Works on both Linux and on Windows exposing the same API
 - Extensible
 - Simple API
+- Reading individual Boot options
+- Setting next Boot option
