@@ -3,7 +3,7 @@ module github.com/0x5a17ed/uefi
 go 1.18
 
 require (
-	github.com/0x5a17ed/iterkit v0.2.0
+	github.com/0x5a17ed/iterkit v0.2.1
 	github.com/Microsoft/go-winio v0.5.2
 	github.com/k0kubun/pp/v3 v3.1.0
 	github.com/spf13/afero v1.8.2
