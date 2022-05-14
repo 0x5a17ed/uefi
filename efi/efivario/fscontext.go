@@ -33,18 +33,18 @@ import (
 
 var nameRegex = regexp.MustCompile(`^([^-]+)-([\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12})$`)
 
-// iterator is a variable name iterator for FsContext
-type iterator struct {
+// fsVarNameIterator is a variable name iterator for FsContext
+type fsVarNameIterator struct {
 	f       afero.File
 	err     error
 	current *VariableNameItem
 }
 
-func (it *iterator) Close() error {
+func (it *fsVarNameIterator) Close() error {
 	return it.f.Close()
 }
 
-func (it *iterator) Next() bool {
+func (it *fsVarNameIterator) Next() bool {
 	for {
 		names, err := it.f.Readdirnames(1)
 		if err != nil || len(names) < 1 {
@@ -72,11 +72,11 @@ func (it *iterator) Next() bool {
 	}
 }
 
-func (it *iterator) Value() VariableNameItem {
+func (it *fsVarNameIterator) Value() VariableNameItem {
 	return *it.current
 }
 
-func (it *iterator) Err() error {
+func (it *fsVarNameIterator) Err() error {
 	return it.err
 }
 
@@ -103,7 +103,7 @@ func (c FsContext) VariableNames() (VariableNameIterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &iterator{f: f}, nil
+	return &fsVarNameIterator{f: f}, nil
 }
 
 func (c FsContext) readEfiVarFileName(name string, out []byte) (a Attributes, n int, err error) {
