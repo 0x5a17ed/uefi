@@ -22,19 +22,20 @@ package main
 import (
 	"fmt"
 
-	"github.com/0x5a17ed/uefi/efi/efivaraccess"
+	"github.com/0x5a17ed/uefi/efi/efivario"
 	"github.com/0x5a17ed/uefi/efi/efivars"
 )
 
 func main() {
-	c := efivaraccess.NewDefaultContext()
+	c := efivario.NewDefaultContext()
 
 	if err := efivars.BootNext.Set(c, 1); err != nil {
 		fmt.Println(err)
-		return
 	}
 }
 ```
+
+For a more in-depth example of how to use this library take a look at [efibootcfg](https://github.com/0x5a17ed/efibootcfg).
 
 
 ## 💡 Features
