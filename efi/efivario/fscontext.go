@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"syscall"
 
+	"github.com/0x5a17ed/itkit"
 	"github.com/spf13/afero"
 	"go.uber.org/multierr"
 
@@ -42,6 +43,10 @@ type fsVarNameIterator struct {
 
 func (it *fsVarNameIterator) Close() error {
 	return it.f.Close()
+}
+
+func (it *fsVarNameIterator) Iter() itkit.Iterator[VariableNameItem] {
+	return it
 }
 
 func (it *fsVarNameIterator) Next() bool {

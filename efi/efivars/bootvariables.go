@@ -19,8 +19,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/0x5a17ed/iterkit"
-	"github.com/0x5a17ed/iterkit/itertools"
+	"github.com/0x5a17ed/itkit"
 
 	"github.com/0x5a17ed/uefi/efi/efitypes"
 	"github.com/0x5a17ed/uefi/efi/efivario"
@@ -99,7 +98,7 @@ type BootEntry struct {
 // Boot efitypes.LoadOption values.
 type BootEntryIterator struct {
 	pit efivario.VariableNameIterator
-	fit iterkit.Iterator[*BootEntry]
+	fit itkit.Iterator[*BootEntry]
 }
 
 func (it *BootEntryIterator) Close() error      { return it.pit.Close() }
@@ -113,7 +112,7 @@ func BootIterator(ctx efivario.Context) (*BootEntryIterator, error) {
 		return nil, err
 	}
 
-	fit := itertools.Map[efivario.VariableNameItem](pit, func(vn efivario.VariableNameItem) *BootEntry {
+	fit := itkit.Map(pit.Iter(), func(vn efivario.VariableNameItem) *BootEntry {
 		if vn.GUID != GlobalVariable {
 			return nil
 		}
@@ -130,7 +129,7 @@ func BootIterator(ctx efivario.Context) (*BootEntryIterator, error) {
 
 		return &BootEntry{Index: uint16(value), Variable: Boot(uint16(value))}
 	})
-	fit = itertools.Filter(fit, func(be *BootEntry) bool { return be != nil })
+	fit = itkit.Filter(fit, func(be *BootEntry) bool { return be != nil })
 
 	return &BootEntryIterator{pit: pit, fit: fit}, nil
 }

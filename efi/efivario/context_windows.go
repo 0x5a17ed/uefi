@@ -59,7 +59,13 @@ type varNameIterator struct {
 	err     error
 }
 
-func (it *varNameIterator) Close() error { return nil }
+func (it *varNameIterator) Close() error {
+	return nil
+}
+
+func (it *varNameIterator) Iter() itkit.Iterator[VariableNameItem] {
+	return it
+}
 
 func (it *varNameIterator) Next() bool {
 	var entry bufferVarEntry

@@ -18,7 +18,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/0x5a17ed/iterkit"
+	"github.com/0x5a17ed/itkit"
 
 	"github.com/0x5a17ed/uefi/efi/efiguid"
 )
@@ -35,7 +35,8 @@ type VariableNameItem struct {
 
 type VariableNameIterator interface {
 	io.Closer
-	iterkit.Iterator[VariableNameItem]
+	itkit.Iterator[VariableNameItem]
+	Iter() itkit.Iterator[VariableNameItem]
 	Err() error
 }
 

@@ -20,7 +20,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/0x5a17ed/iterkit"
+	"github.com/0x5a17ed/itkit"
 
 	"github.com/0x5a17ed/uefi/efi/efireader"
 )
@@ -107,7 +107,7 @@ type DevicePath interface {
 // <https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf#G14.1009325>
 type DevicePaths []DevicePath
 
-func text(iter iterkit.Iterator[DevicePath]) (out string, last DevicePath) {
+func text(iter itkit.Iterator[DevicePath]) (out string, last DevicePath) {
 	var b strings.Builder
 	if !iter.Next() {
 		return
@@ -133,8 +133,7 @@ func text(iter iterkit.Iterator[DevicePath]) (out string, last DevicePath) {
 
 func (p *DevicePaths) AllText() (out []string) {
 	if p != nil {
-		iter := &iterkit.SliceIterator[DevicePath]{Data: *p}
-
+		iter := itkit.From(*p)
 		for {
 			item, last := text(iter)
 			out = append(out, item)
