@@ -53,21 +53,21 @@ func (e *bufferVarEntry) ReadFrom(r io.Reader) (n int64, err error) {
 	return
 }
 
-type varNameIterator struct {
+type wapiVarNameIterator struct {
 	buf     *bytes.Buffer
 	current *VariableNameItem
 	err     error
 }
 
-func (it *varNameIterator) Close() error {
+func (it *wapiVarNameIterator) Close() error {
 	return nil
 }
 
-func (it *varNameIterator) Iter() itkit.Iterator[VariableNameItem] {
+func (it *wapiVarNameIterator) Iter() itkit.Iterator[VariableNameItem] {
 	return it
 }
 
-func (it *varNameIterator) Next() bool {
+func (it *wapiVarNameIterator) Next() bool {
 	var entry bufferVarEntry
 	if _, err := entry.ReadFrom(it.buf); err != nil {
 		if !errors.Is(err, io.EOF) && errors.Is(err, io.ErrUnexpectedEOF) {
@@ -84,11 +84,11 @@ func (it *varNameIterator) Next() bool {
 	return true
 }
 
-func (it *varNameIterator) Value() VariableNameItem {
+func (it *wapiVarNameIterator) Value() VariableNameItem {
 	return *it.current
 }
 
-func (it *varNameIterator) Err() error {
+func (it *wapiVarNameIterator) Err() error {
 	return it.err
 }
 
@@ -132,7 +132,7 @@ func (c WindowsContext) VariableNames() (VariableNameIterator, error) {
 		return nil, err
 	}
 
-	return &varNameIterator{buf: bytes.NewBuffer(buf)}, nil
+	return &wapiVarNameIterator{buf: bytes.NewBuffer(buf)}, nil
 }
 
 func (c WindowsContext) GetSizeHint(name string, guid efiguid.GUID) (int64, error) {
