@@ -23,6 +23,7 @@ import (
 	"io"
 	"syscall"
 
+	"github.com/0x5a17ed/itkit"
 	"golang.org/x/sys/windows"
 
 	"github.com/0x5a17ed/uefi/efi/efiguid"
