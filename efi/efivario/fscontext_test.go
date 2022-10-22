@@ -16,7 +16,6 @@ package efivario
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -26,6 +25,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/0x5a17ed/uefi/efi/efiguid"
+	"github.com/0x5a17ed/uefi/efi/efivario/dirtest"
 )
 
 var testGuid = efiguid.MustFromString("3cd99f3f-4b2b-43eb-ac29-f0890a4772b7")
@@ -48,7 +48,7 @@ type FsContextTestSuite struct {
 }
 
 func (s *FsContextTestSuite) SetupTest() {
-	dir, err := ioutil.TempDir(tempDir(), "uefi-test")
+	dir, err := os.MkdirTemp(dirtest.NVTempDir(), "uefi-test")
 	require.NoError(s.T(), err)
 
 	s.tmpDir = dir
