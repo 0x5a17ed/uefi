@@ -152,7 +152,7 @@ func (s *FsContextTestSuite) TestDelete() {
 	// given that ...
 	f, err := s.context.fs.Create("TestVar-3CD99F3F-4B2B-43EB-AC29-F0890A4772B7")
 	require.NoError(s.T(), err)
-	defer func() { require.NoError(s.T(), f.Close()) }()
+	require.NoError(s.T(), f.Close())
 
 	// when ...
 	err = s.context.Delete("TestVar", testGuid)
