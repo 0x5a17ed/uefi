@@ -133,7 +133,7 @@ func text(iter itkit.Iterator[DevicePath]) (out string, last DevicePath) {
 
 func (p *DevicePaths) AllText() (out []string) {
 	if p != nil {
-		iter := itkit.From(*p)
+		iter := itkit.InSlice(*p)
 		for {
 			item, last := text(iter)
 			out = append(out, item)
