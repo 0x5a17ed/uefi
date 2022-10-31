@@ -91,6 +91,11 @@ type LoadOption struct {
 	OptionalData []byte
 }
 
+// DescriptionString returns the Description field decoded as a string.
+func (lo *LoadOption) DescriptionString() string {
+	return efireader.UTF16ZBytesToString(lo.Description)
+}
+
 func (lo *LoadOption) ReadFrom(r io.Reader) (n int64, err error) {
 	fr := efireader.NewFieldReader(r, &n)
 
