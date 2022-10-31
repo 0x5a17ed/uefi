@@ -79,7 +79,7 @@ func (it *wapiVarNameIterator) Next() bool {
 	}
 
 	it.current = &VariableNameItem{
-		Name: efireader.UTF16NullBytesToString(entry.Name),
+		Name: efireader.UTF16ZBytesToString(entry.Name),
 		GUID: entry.Guid,
 	}
 	return true

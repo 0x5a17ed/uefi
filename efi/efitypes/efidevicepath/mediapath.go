@@ -204,7 +204,7 @@ type FilePathDevicePath struct {
 }
 
 func (f *FilePathDevicePath) Text() string {
-	return fmt.Sprintf("File(%s)", efireader.UTF16NullBytesToString(f.PathName))
+	return fmt.Sprintf("File(%s)", efireader.UTF16ZBytesToString(f.PathName))
 }
 
 func (p *FilePathDevicePath) GetHead() *Head {

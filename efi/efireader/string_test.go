@@ -90,8 +90,8 @@ func TestUTF16NullBytesToString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UTF16NullBytesToString(tt.inp); got != tt.want {
-				t.Errorf("UTF16NullBytesToString() = %v, want %v", got, tt.want)
+			if got := UTF16ZBytesToString(tt.inp); got != tt.want {
+				t.Errorf("UTF16ZBytesToString() = %v, want %v", got, tt.want)
 			}
 		})
 	}

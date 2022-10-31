@@ -36,6 +36,14 @@ func ReadASCIINullBytes(r io.Reader) (out []byte, err error) {
 	}
 }
 
+// ASCIIZBytesToString decodes a null byte terminated ascii byte sequence to a string.
+func ASCIIZBytesToString(b []byte) (s string) {
+	if i := bytes.IndexByte(b, 0); i != -1 {
+		b = b[:i]
+	}
+	return string(b)
+}
+
 func ReadUTF16NullBytes(r io.Reader) (out []byte, err error) {
 	var block [2]byte
 	for {
@@ -50,6 +58,7 @@ func ReadUTF16NullBytes(r io.Reader) (out []byte, err error) {
 	}
 }
 
+// UTF16BytesToString decodes an unterminated UTF-16 byte sequence to a string.
 func UTF16BytesToString(b []byte) string {
 	out := make([]uint16, len(b)>>1)
 	for i, j := 0, 0; j < len(b); i, j = i+1, j+2 {
@@ -58,7 +67,8 @@ func UTF16BytesToString(b []byte) string {
 	return string(utf16.Decode(out))
 }
 
-func UTF16NullBytesToString(b []byte) (s string) {
+// UTF16ZBytesToString decodes a null byte terminated UTF-16 byte sequence to a string.
+func UTF16ZBytesToString(b []byte) (s string) {
 	s = UTF16BytesToString(b)
 	if i := strings.IndexByte(s, 0); i != -1 {
 		s = s[:i]
