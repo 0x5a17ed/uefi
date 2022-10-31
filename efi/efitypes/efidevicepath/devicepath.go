@@ -15,7 +15,6 @@
 package efidevicepath
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -152,17 +151,14 @@ func (p *DevicePaths) ReadFrom(r io.Reader) (n int64, err error) {
 
 	fr := efireader.NewFieldReader(r, &n)
 	for !quit {
+		sfr := efireader.NewFieldReader(fr, nil)
+
 		var head Head
-		if err = fr.ReadFields(&head); err != nil {
+		if err = sfr.ReadFields(&head); err != nil {
 			return fr.Offset(), fmt.Errorf("head: %w", err)
 		}
 
-		body := make([]byte, head.Length-4)
-		if _, err = io.ReadFull(fr, body); err != nil {
-			return fr.Offset(), fmt.Errorf("body: %w", err)
-		}
-
-		bodyReader := bytes.NewReader(body)
+		bodyReader := io.LimitReader(sfr, int64(head.Length-4))
 
 		var d DevicePath
 		switch head.Type {
@@ -180,13 +176,20 @@ func (p *DevicePaths) ReadFrom(r io.Reader) (n int64, err error) {
 			d = &EndOfPath{head}
 			quit = head.SubType == EndEntireSubType
 		default:
-			d, err = ParseUnrecognizedDevicePath(r, head)
+			d, err = ParseUnrecognizedDevicePath(bodyReader, head)
 		}
 
 		if err != nil {
 			return
 		}
 		*p = append(*p, d)
+
+		if left := int64(head.Length) - sfr.Offset(); left > 0 {
+			_, err = io.CopyN(io.Discard, sfr, left)
+			if err != nil {
+				return fr.Offset(), fmt.Errorf("copy: %w", err)
+			}
+		}
 	}
 	return
 }

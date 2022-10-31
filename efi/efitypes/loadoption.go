@@ -112,7 +112,8 @@ func (lo *LoadOption) ReadFrom(r io.Reader) (n int64, err error) {
 	}
 
 	if lo.FilePathListLength > 0 {
-		if _, err = lo.FilePathList.ReadFrom(fr); err != nil {
+		r := io.LimitReader(fr, int64(lo.FilePathListLength))
+		if _, err = lo.FilePathList.ReadFrom(r); err != nil {
 			err = fmt.Errorf("LoadOption/FilepathList: %w", err)
 			return
 		}
