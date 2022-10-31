@@ -102,10 +102,11 @@ type BootEntryIterator struct {
 	fit itkit.Iterator[*BootEntry]
 }
 
-func (it *BootEntryIterator) Close() error      { return it.pit.Close() }
-func (it *BootEntryIterator) Err() error        { return it.pit.Err() }
-func (it *BootEntryIterator) Value() *BootEntry { return it.fit.Value() }
-func (it *BootEntryIterator) Next() bool        { return it.fit.Next() }
+func (it *BootEntryIterator) Close() error                     { return it.pit.Close() }
+func (it *BootEntryIterator) Err() error                       { return it.pit.Err() }
+func (it *BootEntryIterator) Iter() itkit.Iterator[*BootEntry] { return it.fit }
+func (it *BootEntryIterator) Value() *BootEntry                { return it.fit.Value() }
+func (it *BootEntryIterator) Next() bool                       { return it.fit.Next() }
 
 func BootIterator(ctx efivario.Context) (*BootEntryIterator, error) {
 	pit, err := ctx.VariableNames()
