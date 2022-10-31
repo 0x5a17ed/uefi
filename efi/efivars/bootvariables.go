@@ -20,6 +20,7 @@ import (
 	"strconv"
 
 	"github.com/0x5a17ed/itkit"
+	"github.com/0x5a17ed/itkit/itlib"
 
 	"github.com/0x5a17ed/uefi/efi/efitypes"
 	"github.com/0x5a17ed/uefi/efi/efivario"
@@ -112,7 +113,7 @@ func BootIterator(ctx efivario.Context) (*BootEntryIterator, error) {
 		return nil, err
 	}
 
-	fit := itkit.Map(pit.Iter(), func(vn efivario.VariableNameItem) *BootEntry {
+	fit := itlib.Map(pit.Iter(), func(vn efivario.VariableNameItem) *BootEntry {
 		if vn.GUID != GlobalVariable {
 			return nil
 		}
@@ -129,7 +130,7 @@ func BootIterator(ctx efivario.Context) (*BootEntryIterator, error) {
 
 		return &BootEntry{Index: uint16(value), Variable: Boot(uint16(value))}
 	})
-	fit = itkit.Filter(fit, func(be *BootEntry) bool { return be != nil })
+	fit = itlib.Filter(fit, func(be *BootEntry) bool { return be != nil })
 
 	return &BootEntryIterator{pit: pit, fit: fit}, nil
 }

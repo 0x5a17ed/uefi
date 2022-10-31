@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/0x5a17ed/itkit"
+	"github.com/0x5a17ed/itkit/iters/sliceit"
 
 	"github.com/0x5a17ed/uefi/efi/efireader"
 )
@@ -133,7 +134,7 @@ func text(iter itkit.Iterator[DevicePath]) (out string, last DevicePath) {
 
 func (p *DevicePaths) AllText() (out []string) {
 	if p != nil {
-		iter := itkit.InSlice(*p)
+		iter := sliceit.In(*p)
 		for {
 			item, last := text(iter)
 			out = append(out, item)
