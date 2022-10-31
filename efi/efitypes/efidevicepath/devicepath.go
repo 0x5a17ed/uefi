@@ -174,6 +174,8 @@ func (p *DevicePaths) ReadFrom(r io.Reader) (n int64, err error) {
 			d, err = ParseMessagingDevicePath(bodyReader, head)
 		case MediaType:
 			d, err = ParseMediaDevicePath(bodyReader, head)
+		case BIOSBootType:
+			d, err = ParseBIOSDevicePath(bodyReader, head)
 		case EndOfPathType:
 			d = &EndOfPath{head}
 			quit = head.SubType == EndEntireSubType
