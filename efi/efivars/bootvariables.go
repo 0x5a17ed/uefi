@@ -74,6 +74,7 @@ var (
 		guid:         GlobalVariable,
 		defaultAttrs: defaultAttrs,
 		unmarshal:    sliceUnmarshaller[uint16],
+		marshal:      sliceMarshaller[uint16],
 	}
 )
 
