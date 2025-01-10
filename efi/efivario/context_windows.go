@@ -46,9 +46,24 @@ func (e *bufferVarEntry) ReadFrom(r io.Reader) (n int64, err error) {
 		return
 	}
 
-	e.Name = make([]byte, e.Length-20)
-	if _, err = io.ReadFull(fr, e.Name); err != nil {
-		return
+	if e.Length < 20 {
+		var nameBuffer []byte
+		for {
+			var u16char [2]byte
+			if err = fr.ReadFields(u16char[:]); err != nil {
+				return
+			}
+			nameBuffer = append(nameBuffer, u16char[0], u16char[1])
+			if u16char[0] == 0 && u16char[1] == 0 {
+				break
+			}
+		}
+		e.Name = nameBuffer
+	} else {
+		e.Name = make([]byte, e.Length-20)
+		if _, err = io.ReadFull(fr, e.Name); err != nil {
+			return
+		}
 	}
 
 	return
