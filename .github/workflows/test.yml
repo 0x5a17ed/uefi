@@ -25,8 +25,8 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go${{ matrix.go-version }}-${{ hashFiles('**/go.mod') }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: ${{ runner.os }}-go${{ matrix.go-version }}-
+          key: ${{ runner.os }}-${{ matrix.os }}-go${{ matrix.go-version }}-${{ hashFiles('**/go.mod') }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.os }}-go${{ matrix.go-version }}-
 
       - name: Download dependencies
         run: go mod download
@@ -61,8 +61,8 @@ jobs:
             ~/go/pkg/mod
             ~/.cache/go-build
             ~\AppData\Local\go-build
-          key: ${{ runner.os }}-go${{ matrix.go-version }}-${{ hashFiles('**/go.mod') }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: ${{ runner.os }}-go${{ matrix.go-version }}-
+          key: ${{ runner.os }}-${{ matrix.os }}-go${{ matrix.go-version }}-${{ hashFiles('**/go.mod') }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.os }}-go${{ matrix.go-version }}-
 
       - name: Download dependencies
         run: go mod download
