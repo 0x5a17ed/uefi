@@ -28,6 +28,9 @@ jobs:
           key: ${{ runner.os }}-go${{ matrix.go-version }}-${{ hashFiles('**/go.mod') }}-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go${{ matrix.go-version }}-
 
+      - name: Download dependencies
+        run: go mod download
+
       - run: go test ./...
 
   # Main test suite for all Go versions and OS.
@@ -60,6 +63,9 @@ jobs:
             ~\AppData\Local\go-build
           key: ${{ runner.os }}-go${{ matrix.go-version }}-${{ hashFiles('**/go.mod') }}-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go${{ matrix.go-version }}-
+
+      - name: Download dependencies
+        run: go mod download
 
       - name: Run tests (with race detector on Linux)
         if: matrix.os != 'windows-2019'
