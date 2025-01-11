@@ -3,7 +3,36 @@ on: [push, pull_request]
 name: Test
 
 jobs:
+  # Run tests for the oldest supported Go version and OS first.
+  pre-test:
+
+    strategy:
+      matrix:
+        go-version: [1.18.x]
+        os: [ubuntu-20.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+
+      - run: go test ./...
+
+  # Main test suite for all Go versions and OS.
   test:
+    needs: pre-test
+
     strategy:
       matrix:
         go-version: [1.18.x, 1.19.x, 1.20.x, 1.21.x, 1.22.x, 1.23.x]
@@ -12,7 +41,9 @@ jobs:
           - ubuntu-20.04
           - windows-2022
           - windows-2019
+
     runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/setup-go@v3
         with:
