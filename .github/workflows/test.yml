@@ -30,4 +30,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
-      - run: go test -race ./...
+      - name: Run tests (with race detector on Linux)
+        if: matrix.os != 'windows-2019'
+        run: go test -race ./...
+
+      - name: Run tests (without race detector)
+        if: matrix.os == 'windows-2019'
+        run: go test ./...
